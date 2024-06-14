@@ -1,0 +1,25 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: XiaoMiCar
+  profiles:
+    active: dev
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/xiaomi_car?useSSL=false&serverTimezone=UTC
+    username: xiaomi_car_warn_service
+    password: XiaoMi1fas6geYWTRHs6s2fdshs9d22da65Wt126ezh
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  mapper-locations: classpath*:mapper/*.xml
+  type-aliases-package: com.xiaomi.domain
+logging:
+  level:
+    com.xiaomi: debug
