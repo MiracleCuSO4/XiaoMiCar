@@ -14,12 +14,14 @@ spring:
     host: 127.0.0.1
     port: 6379
     password:
+  jackson:
+    time-zone: Asia/Shanghai
 
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
   mapper-locations: classpath*:mapper/*.xml
-  type-aliases-package: com.xiaomi.domain
+  type-aliases-package: com.xiaomi.domain.po
 logging:
   level:
     com.xiaomi: debug
