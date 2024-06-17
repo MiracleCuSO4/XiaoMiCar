@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import static com.xiaomi.common.AppHttpCodeEnum.ILLEGAL_ARGUMENT;
 import static com.xiaomi.common.AppHttpCodeEnum.SERVER_ERROR;
 
 /**
@@ -19,9 +20,17 @@ public class GlobalExceptionHandler {
      * 捕获业务异常
      */
     @ExceptionHandler
-    public Result<?> exceptionHandler(BaseException ex) {
+    public Result<?> baseExceptionHandler(BaseException ex) {
         log.error("异常信息：{}", ex.getMessage());
         return Result.errorResult(SERVER_ERROR, ex.getMessage());
     }
+
+    @ExceptionHandler
+    public Result<?> illegalArgumentExceptionHandler(IllegalArgumentException ex) {
+        log.error("异常信息：{}", ex.getMessage());
+        return Result.errorResult(ILLEGAL_ARGUMENT, ex.getMessage());
+    }
+
+
 
 }

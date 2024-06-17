@@ -5,13 +5,16 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.xiaomi.domain.rule.Condition;
 import com.xiaomi.domain.rule.FormulaRateConfig;
+import com.xiaomi.domain.rule.Rate;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * 规则表
@@ -48,4 +51,15 @@ public class Rule implements Serializable {
 
     @ApiModelProperty(value = "0=未删除,1=逻辑删除")
     private Byte isDelete;
+
+    public String getDescription(double value, Rate rate){
+        StringBuilder stringBuilder = new StringBuilder();
+        List<Condition> conditionList = rate.getCondition();
+        for (Condition condition : conditionList) {
+            stringBuilder.append(value).append(" ").append(condition.getOperator()).append(" ").append(condition.getValue());
+            stringBuilder.append(" && ");
+        }
+        stringBuilder.delete(stringBuilder.length() - 3, stringBuilder.length()); // 去掉最后多余的&&
+        return stringBuilder.toString();
+    }
 }

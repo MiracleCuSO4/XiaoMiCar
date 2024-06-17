@@ -11,7 +11,7 @@ import java.util.List;
 public class Rate {
 
     @ApiModelProperty(value = "告警级别")
-    private Integer warnLever;
+    private Byte warnLever;
 
     @ApiModelProperty(value = "条件列表")
     private List<Condition> condition;

@@ -1,7 +1,11 @@
 package com.xiaomi.domain.vo;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
+@Data
+@ApiModel(description = "报警信息vo")
 public class WarnVo {
     @ApiModelProperty(value = "车架编号", required = true)
     private Integer carId;
