@@ -1,0 +1,41 @@
+{
+  "formula": "${Mx} - ${Mi}",
+  "rate": [
+    {
+      "warnLever": 0,
+      "condition": [
+        {"operator": ">=", "value": 5}
+      ]
+    },
+    {
+      "warnLever": 1,
+      "condition": [
+        {"operator": ">=", "value": 3},
+        {"operator": "<", "value": 5}
+      ]
+    },{
+      "warnLever": 2,
+      "condition": [
+        {"operator": ">=", "value": 1},
+        {"operator": "<", "value": 3}
+      ]
+    },{
+      "warnLever": 3,
+      "condition": [
+        {"operator": ">=", "value": 0.6},
+        {"operator": "<", "value": 1}
+      ]
+    },{
+      "warnLever": 4,
+      "condition": [
+        {"operator": ">=", "value": 0.2},
+        {"operator": "<", "value": 0.6}
+      ]
+    },{
+      "warnLever": null,
+      "condition": [
+        {"operator": "<", "value": 0.2}
+      ]
+    }
+  ]
+}

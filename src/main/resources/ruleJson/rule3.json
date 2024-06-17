@@ -1,0 +1,31 @@
+{
+  "formula": "${Ix} - ${Ii}",
+  "rate": [
+    {
+      "warnLever": 0,
+      "condition": [
+        {"operator": ">=", "value": 3}
+      ]
+    },
+    {
+      "warnLever": 1,
+      "condition": [
+        {"operator": ">=", "value": 1},
+        {"operator": "<", "value": 3}
+      ]
+    },
+    {
+      "warnLever": 2,
+      "condition": [
+        {"operator": ">=", "value": 0.2},
+        {"operator": "<", "value": 1}
+      ]
+    },
+    {
+      "warnLever": null,
+      "condition": [
+        {"operator": "<", "value": 0.2}
+      ]
+    }
+  ]
+}

@@ -1,8 +1,11 @@
 package com.xiaomi.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.xiaomi.domain.rule.FormulaRateConfig;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -15,7 +18,7 @@ import java.sql.Timestamp;
  */
 @Data
 @ApiModel(description = "规则表")
-@TableName("rule")
+@TableName(value = "rule",autoResultMap = true)
 public class Rule implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -34,7 +37,8 @@ public class Rule implements Serializable {
     private String batteryType;
 
     @ApiModelProperty(value = "预警规则")
-    private String rule;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private FormulaRateConfig formulaRateConfig;
 
     @ApiModelProperty(value = "创建时间")
     private Timestamp createTime;
