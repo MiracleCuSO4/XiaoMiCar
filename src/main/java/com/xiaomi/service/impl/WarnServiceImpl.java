@@ -51,7 +51,7 @@ public class WarnServiceImpl implements WarnService {
             // 根据车架编号carId获取汽车信息
             Car car = carService.getByCarId(signalDto.getCarId());
             if(car == null){
-                throw new DataNotExistException(signalDto.getCarId() + "不存在");
+                throw new DataNotExistException("不存在" + signalDto.getCarId() + "的车架id");
             }
             // 根据规则编号warnId与车辆电池类型batteryType获取规则
             List<Rule> ruleList = ruleService.getByWarnIdAndCar(signalDto.getWarnId(), car.getBatteryType());
@@ -83,8 +83,7 @@ public class WarnServiceImpl implements WarnService {
             }
         }
         if(isTolerableBadRequest){
-            Result<List<WarnVo>> result = new Result<>();
-            return result.error(ILLEGAL_ARGUMENT.getCode(), "缺少计算公式的信号参数或者公式有误,已跳过无法计算的公式", resultList);
+            return Result.errorResult(ILLEGAL_ARGUMENT.getCode(), "缺少计算公式的信号参数或者公式有误,已跳过无法计算的公式", resultList);
         } else {
             return Result.okResult(resultList);
         }

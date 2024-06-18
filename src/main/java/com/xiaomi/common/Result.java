@@ -54,6 +54,10 @@ public class Result<T> implements Serializable {
         return new Result<>(enums.getCode(), errorMessage);
     }
 
+    public static <T> Result<T> errorResult(int code, String message, T data) {
+        return new Result<>(code, message, data);
+    }
+
     public Result<T> error(Integer code, String message, T data) {
         this.status = code;
         this.msg = message;
