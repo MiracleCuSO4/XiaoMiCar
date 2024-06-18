@@ -9,5 +9,5 @@ import java.util.List;
 public interface RuleService extends IService<Rule> {
     Result<Void> addRule(Rule rule);
 
-    List<Rule> getByWarnIdAndBatteryType(Integer warnId, String batteryType);
+    List<Rule> getByWarnIdAndCar(Integer warnId, String batteryType);
 }

@@ -54,13 +54,10 @@ public class Result<T> implements Serializable {
         return new Result<>(enums.getCode(), errorMessage);
     }
 
-    private static Result<?> setAppHttpCodeEnum(AppHttpCodeEnum enums, String errorMessage) {
-        return new Result<>(enums.getCode(), errorMessage);
-    }
-
-    public Result<T> error(Integer code, String message) {
+    public Result<T> error(Integer code, String message, T data) {
         this.status = code;
         this.msg = message;
+        this.data = data;
         return this;
     }
 

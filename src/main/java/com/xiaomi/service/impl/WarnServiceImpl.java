@@ -7,9 +7,9 @@ import com.xiaomi.domain.dto.SignalDto;
 import com.xiaomi.domain.po.Car;
 import com.xiaomi.domain.po.Rule;
 import com.xiaomi.domain.rule.Condition;
-import com.xiaomi.domain.rule.FormulaRateConfig;
 import com.xiaomi.domain.rule.Rate;
 import com.xiaomi.domain.vo.WarnVo;
+import com.xiaomi.exception.DataNotExistException;
 import com.xiaomi.service.CarService;
 import com.xiaomi.service.RuleService;
 import com.xiaomi.service.WarnService;
@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.xiaomi.common.AppHttpCodeEnum.ILLEGAL_ARGUMENT;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -36,60 +38,94 @@ public class WarnServiceImpl implements WarnService {
     // 使用js脚本引擎计算公式值
     private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
 
+    /**
+     * 根据请求的数据响应报警结果
+     * @param dtoList 预警所需的车架和信号的list
+     * @return 报警结果list
+     */
     @Override
     public Result<List<WarnVo>> warn(List<SignalDto> dtoList) {
+        boolean isTolerableBadRequest = false;
         List<WarnVo> resultList = new ArrayList<>();
         for (SignalDto signalDto : dtoList) {
             // 根据车架编号carId获取汽车信息
             Car car = carService.getByCarId(signalDto.getCarId());
+            if(car == null){
+                throw new DataNotExistException(signalDto.getCarId() + "不存在");
+            }
             // 根据规则编号warnId与车辆电池类型batteryType获取规则
-            List<Rule> ruleList = ruleService.getByWarnIdAndBatteryType(signalDto.getWarnId(), car.getBatteryType());
+            List<Rule> ruleList = ruleService.getByWarnIdAndCar(signalDto.getWarnId(), car.getBatteryType());
             // 把信号jsonString比如"{\"Mx\":12.0,\"Mi\":0.6}"转为map
-            Map<String, Double> signal = JSON.parseObject(signalDto.getSignal(), new TypeReference<Map<String, Double>>(){});
+            Map<String, Double> signal;
+            try {
+                signal = JSON.parseObject(signalDto.getSignal(), new TypeReference<Map<String, Double>>(){});
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new IllegalArgumentException("BadRequest: signal由json转Map<String, Double>时出错, Caused by: ");
+            }
             // 逐一判断是否要报警
             log.info("开始判断汽车{}是否需要报警", car);
             for (Rule rule : ruleList) {
-                FormulaRateConfig config = rule.getFormulaRateConfig();
                 double value;
                 try {
                     // 根据公式例如"${Mx} - ${Mi}"和信号Map{"Mx":12.0, "Mi":0.6}计算出结果
-                    value = calculate(config.getFormula(), signal);
+                    value = calculate(rule.getFormulaRateConfig().getFormula(), signal);
                 } catch (ScriptException e) {
                     e.printStackTrace();
-                    continue; // 缺少计算这个公式的信号参数或者公式有误,跳过这个规则
+                    isTolerableBadRequest = true; // 公式无法计算出结果,因为缺少计算这个公式的信号参数或者公式有误,这个错误可以容忍
+                    continue; // 忽略掉,数据清洗,跳过这个规则
                 }
-                // 根据计算值和规则条件判断是否需要报警
-                for (Rate rate : config.getRate()) {
-                    boolean match = true;
-                    for (Condition condition : rate.getCondition()) {
-                        /* "condition": [
-                         *         {"operator": ">=", "value": 3},
-                         *         {"operator": "<", "value": 5}
-                         *       ]
-                         */
-                        if (!compare(value, condition.getOperator(), condition.getValue())) {
-                            // 这个报警等级中有任何一个条件condition不满足就退出这个报警等级break
-                            match = false;
-                            break;
-                        }
-                    }
-                    // 找到完全匹配的报警等级,比如3<=(Mx-Mi)<5  注意不报警的规则对应的warnLever为null,如果为null就不记录
-                    if (match && rate.getWarnLever() != null) {
-                        // 产生报警信息
-                        WarnVo warnVo = new WarnVo();
-                        warnVo.setCarId(signalDto.getCarId());
-                        warnVo.setBatteryType(car.getBatteryType());
-                        warnVo.setWarnName(rule.getWarnName());
-                        warnVo.setWarnLevel(rate.getWarnLever());
-                        resultList.add(warnVo);
-                        log.warn("产生一条报警:{},因为满足规则编号:{},电池类型:{},报警等级:{}的公式:{}",
-                                warnVo, rule.getWarnId(), rule.getBatteryType(), rate.getWarnLever(), rule.getDescription(value, rate));
-                        break; // 跳出当前规则的判断
-                    }
+                // 检查是否需要报警
+                WarnVo warnVo = checkIfNeedsWarn(car, rule, value);
+                if(warnVo != null){
+                    resultList.add(warnVo);
                 }
             }
         }
-        return Result.okResult(resultList);
+        if(isTolerableBadRequest){
+            Result<List<WarnVo>> result = new Result<>();
+            return result.error(ILLEGAL_ARGUMENT.getCode(), "缺少计算公式的信号参数或者公式有误,已跳过无法计算的公式", resultList);
+        } else {
+            return Result.okResult(resultList);
+        }
+    }
+
+    /**
+     * 根据计算值和规则条件判断是否需要报警
+     * @param car 车辆信息
+     * @param rule 一条规则
+     * @param value 这个车辆的信号数据使用这个规则的公式计算出的结果
+     * @return 报警记录,如果无需报警返回null
+     */
+    public WarnVo checkIfNeedsWarn(Car car, Rule rule, double value) {
+        for (Rate rate : rule.getFormulaRateConfig().getRate()) {
+            boolean match = true;
+            for (Condition condition : rate.getCondition()) {
+                /* "condition": [
+                 *         {"operator": ">=", "value": 3},
+                 *         {"operator": "<", "value": 5}
+                 *       ]
+                 */
+                if (!compare(value, condition.getOperator(), condition.getValue())) {
+                    // 这个报警等级中有任何一个条件condition不满足就退出这个报警等级break
+                    match = false;
+                    break;
+                }
+            }
+            // 找到完全匹配的报警等级,比如3<=(Mx-Mi)<5  注意不报警的规则对应的warnLever为null,如果为null就不记录
+            if (match && rate.getWarnLever() != null) {
+                // 产生报警信息
+                WarnVo warnVo = new WarnVo();
+                warnVo.setCarId(car.getCarId());
+                warnVo.setBatteryType(car.getBatteryType());
+                warnVo.setWarnName(rule.getWarnName());
+                warnVo.setWarnLevel(rate.getWarnLever());
+                log.warn("产生一条报警:{},因为满足规则编号:{},电池类型:{},报警等级:{}的公式:{}",
+                        warnVo, rule.getWarnId(), rule.getBatteryType(), rate.getWarnLever(), rule.getDescription(value, rate));
+                return warnVo; // 跳出当前规则的判断
+            }
+        }
+        return null; // 无需报警
     }
 
 
