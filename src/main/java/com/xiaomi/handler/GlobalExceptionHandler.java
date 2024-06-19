@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Result<?> handlerDataNotExistException(DataNotExistException ex) {
-        log.error("数据不存在异常: {}", ex.getMessage());
+        log.warn("数据不存在异常: {}", ex.getMessage());
         return Result.errorResult(DATA_NOT_EXIST, ex.getMessage());
     }
 

@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootTest(classes = WarnApplication.class)
 @RunWith(SpringRunner.class)
-public class CarServiceImplTest {
+public class CarMapperOldTest {
 
     @Autowired
     private CarMapper carMapper;
