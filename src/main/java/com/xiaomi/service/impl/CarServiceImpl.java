@@ -84,15 +84,15 @@ public class CarServiceImpl extends ServiceImpl<CarMapper, Car> implements CarSe
     }
 
     @Override
-    public PageResult<CarVo> selectPageList(PageRequest pageQueryDto) {
-        IPage<Car> page = new Page<>(pageQueryDto.getPageNumber(), pageQueryDto.getPageSize());
+    public PageResult<CarVo> selectPageList(PageRequest pageRequest) {
+        IPage<Car> page = new Page<>(pageRequest.getPageNumber(), pageRequest.getPageSize());
         page = page(page, Wrappers.<Car>lambdaQuery().eq(Car::getIsDelete, 0).orderByAsc(Car::getCarId));
         List<CarVo> carVoList = page.getRecords().stream()
                 .map(car -> BeanUtil.copyProperties(car, CarVo.class))
                 .collect(Collectors.toList());
 
         PageResult<CarVo> pageResult = new PageResult<>();
-        pageResult.setTotal(pageResult.getTotal());
+        pageResult.setTotal(page.getTotal());
         pageResult.setRecords(carVoList);
         return pageResult;
     }

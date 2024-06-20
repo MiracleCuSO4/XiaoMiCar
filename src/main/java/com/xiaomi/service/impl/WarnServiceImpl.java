@@ -4,13 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.xiaomi.common.Result;
 import com.xiaomi.domain.dto.SignalDto;
-import com.xiaomi.domain.po.Car;
 import com.xiaomi.domain.po.Rule;
 import com.xiaomi.domain.rule.Condition;
 import com.xiaomi.domain.rule.Rate;
 import com.xiaomi.domain.vo.CarVo;
 import com.xiaomi.domain.vo.WarnVo;
-import com.xiaomi.exception.DataNotExistException;
 import com.xiaomi.service.CarService;
 import com.xiaomi.service.RuleService;
 import com.xiaomi.service.WarnService;
@@ -52,7 +50,7 @@ public class WarnServiceImpl implements WarnService {
             // 根据车架编号carId获取汽车信息
             CarVo carVo = carService.selectByCarId(signalDto.getCarId());
             // 根据规则编号warnId与车辆电池类型batteryType获取规则
-            List<Rule> ruleList = ruleService.getByWarnIdAndCar(signalDto.getWarnId(), carVo.getBatteryType());
+            List<Rule> ruleList = ruleService.selectByWarnIdAndCar(signalDto.getWarnId(), carVo.getBatteryType());
             // 把信号jsonString比如"{\"Mx\":12.0,\"Mi\":0.6}"转为map
             Map<String, Double> signal;
             try {

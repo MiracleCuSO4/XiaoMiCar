@@ -1,10 +1,13 @@
 package com.xiaomi.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSON;
 import com.xiaomi.WarnApplication;
 import com.xiaomi.common.Result;
+import com.xiaomi.domain.dto.RuleDto;
 import com.xiaomi.domain.po.Rule;
 import com.xiaomi.domain.rule.FormulaRateConfig;
+import com.xiaomi.domain.vo.RuleVo;
 import com.xiaomi.service.RuleService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,19 +30,32 @@ public class RuleServiceImplTest {
     private RuleService ruleService;
 
     @Test
-    public void testAddRule(){
-        Rule rule = new Rule();
-        rule.setWarnId(1);
-        rule.setWarnName("电压差报警");
-        rule.setBatteryType("三元电池");
-        rule.setFormulaRateConfig(JSON.parseObject(ruleJson, FormulaRateConfig.class));
-        Result<Void> result = ruleService.addRule(rule);
+    public void testInsertRule(){
+        RuleDto ruleDto = new RuleDto();
+        ruleDto.setWarnId(1);
+        ruleDto.setWarnName("添加电压差报警规则测试");
+        ruleDto.setBatteryType("三元电池");
+        ruleDto.setFormulaRateConfig(JSON.parseObject(ruleJson, FormulaRateConfig.class));
+        ruleService.insertRule(ruleDto);
     }
 
     @Test
-    public void testSelectRule(){
-        Rule rule = ruleService.getById(1);
-        System.out.println(rule);
+    public void testSelectByRuleId(){
+        RuleVo ruleVo = ruleService.selectByRuleId(5);
+        System.out.println(ruleVo);
+    }
+
+    @Test
+    public void testUpdateRule(){
+        RuleVo ruleVo = ruleService.selectByRuleId(5);
+        ruleVo.getFormulaRateConfig().setFormula("${Mx} - ${Mi} + 1.2");
+        RuleDto ruleDto = BeanUtil.copyProperties(ruleVo, RuleDto.class);
+        ruleService.updateRule(ruleDto);
+    }
+
+    @Test
+    public void testDeleteByRuleId(){
+        ruleService.deleteByRuleId(5);
     }
 
     @Test
@@ -51,12 +67,12 @@ public class RuleServiceImplTest {
 
         for(int i = 0; i < 4; i++){
             try {
-                Rule rule = new Rule();
-                rule.setWarnId(warnId[i]);
-                rule.setWarnName(warnNameList[i]);
-                rule.setBatteryType(batteryTypeList[i]);
-                rule.setFormulaRateConfig(JSON.parseObject(readJsonFile(jsonFileNameList[i]), FormulaRateConfig.class));
-                ruleService.addRule(rule);
+                RuleDto ruleDto = new RuleDto();
+                ruleDto.setWarnId(warnId[i]);
+                ruleDto.setWarnName(warnNameList[i]);
+                ruleDto.setBatteryType(batteryTypeList[i]);
+                ruleDto.setFormulaRateConfig(JSON.parseObject(readJsonFile(jsonFileNameList[i]), FormulaRateConfig.class));
+                ruleService.insertRule(ruleDto);
             } catch (IOException e) {
                 e.printStackTrace();
             }

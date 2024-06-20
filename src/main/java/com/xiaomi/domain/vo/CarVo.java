@@ -11,18 +11,18 @@ import lombok.Data;
 @ApiModel(description = "车辆信息vo")
 public class CarVo {
 
-    @ApiModelProperty(value = "车辆识别码Vehicle Identification")
+    @ApiModelProperty(value = "车辆识别码Vehicle Identification", required = true)
     private String vid;
 
-    @ApiModelProperty(value = "车架编号")
+    @ApiModelProperty(value = "车架编号", required = true)
     private Integer carId;
 
-    @ApiModelProperty(value = "电池类型")
+    @ApiModelProperty(value = "电池类型", required = true)
     private String batteryType;
 
-    @ApiModelProperty(value = "总里程(km)")
+    @ApiModelProperty(value = "总里程(km)", required = true)
     private Integer totalDistance;
 
-    @ApiModelProperty(value = "电池健康状态(%)")
+    @ApiModelProperty(value = "电池健康状态(%)", required = true)
     private Integer batteryHealth;
 }

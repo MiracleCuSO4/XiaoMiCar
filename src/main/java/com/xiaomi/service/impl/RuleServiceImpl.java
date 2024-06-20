@@ -1,14 +1,21 @@
 package com.xiaomi.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xiaomi.common.PageResult;
 import com.xiaomi.common.RedisConstant;
-import com.xiaomi.common.Result;
+import com.xiaomi.domain.dto.PageRequest;
+import com.xiaomi.domain.dto.RuleDto;
 import com.xiaomi.domain.po.Rule;
+import com.xiaomi.domain.vo.RuleVo;
+import com.xiaomi.exception.DataNotExistException;
 import com.xiaomi.mapper.RuleMapper;
 import com.xiaomi.service.RuleService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,12 +37,6 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    @Override
-    public Result<Void> addRule(Rule rule) {
-        save(rule);
-        return Result.okResult(null);
-    }
-
     /**
      * 获取匹配的规则列表,缓存查询条件对应的规则列表
      * @param warnId 规则编号(非必须)
@@ -42,7 +44,7 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
      * @return 规则列表
      */
     @Override
-    public List<Rule> getByWarnIdAndCar(Integer warnId, String batteryType) {
+    public List<Rule> selectByWarnIdAndCar(Integer warnId, String batteryType) {
         if(StrUtil.isBlank(batteryType)){
             return Collections.emptyList();
         }
@@ -59,4 +61,62 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
         }
         return CollectionUtil.emptyIfNull(ruleList);
     }
+
+    /**
+     * 更新规则时调用这个方法删除与这个规则编号warnId相关的查询缓存
+     * @param warnId 规则编号(非必须)
+     * @param batteryType 车辆电池类型(必须)
+     */
+    public void deleteRelatedRuleCache(Integer warnId, String batteryType){
+        stringRedisTemplate.delete(String.format(RedisConstant.RULE_QUERY_KEY, warnId, batteryType));
+        stringRedisTemplate.delete(String.format(RedisConstant.RULE_QUERY_KEY, RedisConstant.MATCH_ALL_WARN_ID, batteryType));
+    }
+
+    @Override
+    public RuleVo selectByRuleId(Integer ruleId) {
+        Rule rule = getOne(Wrappers.<Rule>lambdaQuery().eq(Rule::getId, ruleId).eq(Rule::getIsDelete, 0));
+        if(rule == null) {
+            throw new DataNotExistException("不存在规则序号ruleId为" + ruleId + "的规则");
+        }
+        return BeanUtil.copyProperties(rule, RuleVo.class);
+    }
+
+    @Override
+    public PageResult<RuleVo> selectPageList(PageRequest pageRequest) {
+        IPage<Rule> page = new Page<>(pageRequest.getPageNumber(), pageRequest.getPageSize());
+        page = page(page, Wrappers.<Rule>lambdaQuery().eq(Rule::getIsDelete, 0).orderByAsc(Rule::getUpdateTime));
+        List<RuleVo> ruleVoList = page.getRecords().stream()
+                .map(rule -> BeanUtil.copyProperties(rule, RuleVo.class))
+                .collect(Collectors.toList());
+
+        PageResult<RuleVo> pageResult = new PageResult<>();
+        pageResult.setTotal(page.getTotal());
+        pageResult.setRecords(ruleVoList);
+        return pageResult;
+    }
+
+    @Override
+    public void insertRule(RuleDto ruleDto) {
+        Rule rule = BeanUtil.copyProperties(ruleDto, Rule.class);
+        save(rule);
+        // 删除与这个规则编号warnId相关的查询缓存
+        deleteRelatedRuleCache(rule.getWarnId(), rule.getBatteryType());
+    }
+
+    @Override
+    public void updateRule(RuleDto ruleDto) {
+        if(ruleDto.getId() == null){
+            throw new IllegalArgumentException("需要规则序号id,只有warnId不能唯一确定规则");
+        }
+        updateById(BeanUtil.copyProperties(ruleDto, Rule.class));
+        deleteRelatedRuleCache(ruleDto.getWarnId(), ruleDto.getBatteryType());
+    }
+
+    @Override
+    public void deleteByRuleId(Integer ruleId) {
+        Rule rule = getById(ruleId);
+        update(Wrappers.<Rule>lambdaUpdate().eq(Rule::getId, ruleId).set(Rule::getIsDelete, 1));
+        deleteRelatedRuleCache(ruleId, rule.getBatteryType());
+    }
+
 }

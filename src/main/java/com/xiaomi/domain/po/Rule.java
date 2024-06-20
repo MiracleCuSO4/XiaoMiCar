@@ -26,11 +26,11 @@ public class Rule implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "规则序号")
+    @ApiModelProperty(value = "规则序号id")
     @TableId(type = IdType.AUTO)
     private Integer id;
 
-    @ApiModelProperty(value = "规则编号id")
+    @ApiModelProperty(value = "规则编号warnId")
     private Integer warnId;
 
     @ApiModelProperty(value = "规则名称")

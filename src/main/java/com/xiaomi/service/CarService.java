@@ -16,5 +16,5 @@ public interface CarService extends IService<Car> {
 
     void deleteByCarId(Integer carId);
 
-    PageResult<CarVo> selectPageList(PageRequest pageQueryDto);
+    PageResult<CarVo> selectPageList(PageRequest pageRequest);
 }
