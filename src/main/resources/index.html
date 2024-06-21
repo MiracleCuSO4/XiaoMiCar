@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>展示页面</title>
+
+  <!-- 引入 Element UI 样式 -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <!--    <link rel="stylesheet" href="./element-ui/lib/theme-chalk/index.css">-->
+  <style>
+    /* 整体布局样式 */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    #app {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* 侧边栏样式 */
+    .sidebar {
+      width: 200px;
+      background-color: rgb(238, 241, 246);
+      border-right: 1px solid #eee;
+      box-sizing: border-box;
+    }
+
+    .sidebar-menu {
+      padding-top: 20px;
+    }
+
+    .sidebar-menu-item {
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    /* 主内容区样式 */
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* 表格样式 */
+    .table-container {
+      margin-top: 20px;
+      padding: 20px;
+    }
+
+    .table-container {
+      margin-top: 20px;
+    }
+
+    /* 分页样式 */
+    .pagination {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    /* 偶数行样式 */
+    .even-row {
+      background-color: #f5f5f5;
+      /* 设置偶数行的背景色 */
+    }
+
+    /* 奇数行样式 */
+    .odd-row {
+      background-color: #ffffff;
+      /* 设置奇数行的背景色 */
+    }
+
+    .record-row-read {
+      background-color: #F9EAAB !important;
+      /* 设置已读状态行的背景色 */
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="app">
+  <div class="sidebar">
+    <el-menu class="sidebar-menu">
+
+      <el-submenu index="1">
+        <template slot="title">
+          <div class="sidebar-menu-item" @click="clickMenu = 1">
+            <i class="el-icon-s-platform"></i>
+            小米汽车
+          </div>
+        </template>
+      </el-submenu>
+
+      <el-submenu index="2">
+        <template slot="title">
+          <div class="sidebar-menu-item" @click="clickMenu = 2">
+            <i class="el-icon-setting"></i>
+            汽车数据
+          </div>
+        </template>
+      </el-submenu>
+
+      <el-submenu index="3">
+        <template slot="title">
+          <div class="sidebar-menu-item" @click="clickMenu = 3">
+            <i class="el-icon-menu"></i>
+            预警规则
+          </div>
+        </template>
+      </el-submenu>
+
+      <!--<el-submenu index="4">
+        <template slot="title">
+          <div class="sidebar-menu-item" @click="clickMenu = 4">
+            <i class="el-icon-setting"></i>
+            预警记录
+          </div>
+        </template>
+      </el-submenu>-->
+
+    </el-menu>
+  </div>
+
+  <div class="main-content">
+
+    <!-- 首页内容 -->
+    <div v-show="clickMenu == 1">
+      <img width="100%" alt="小米汽车"
+           src="https://s1.xiaomiev.com/activity-outer-assets/0328/images/home/section1x1281.jpg?">
+      <a href="https://www.xiaomiev.com/" target="_blank">小米汽车官网</a>
+    </div>
+
+    <!-- 汽车数据表格 -->
+    <div v-show="clickMenu == 2">
+      <el-table :data="carList" stripe style="width: 100%">
+        <el-table-column prop="vid" label="vid" align="center"></el-table-column>
+        <el-table-column prop="carId" label="车架id"></el-table-column>
+        <el-table-column prop="batteryType" label="电池类型"></el-table-column>
+        <el-table-column prop="batteryHealth" label="电池健康状态(%)"></el-table-column>
+        <el-table-column prop="totalDistance" label="总里程(km)"></el-table-column>
+      </el-table>
+    </div>
+    <div v-show="clickMenu == 2" class="pagination" v-if="carList && carList.length">
+      <el-pagination @size-change="carListHandleSizeChange" @current-change="carListHandleCurrentChange"
+                     :current-page="carCurrentPage" :page-sizes="[10, 15, 20, 50, 100]"
+                     :page-size="carPageRequest.pageSize"
+                     layout="total, sizes, prev, pager, next, jumper" :total="carTotalCount">
+      </el-pagination>
+    </div>
+
+
+    <!-- 预警规则 -->
+    <div v-show="clickMenu == 3" class="table-container">
+
+      <!--添加数据对话框表单-->
+      <el-dialog title="编辑规则信息" :visible.sync="ruleDialogVisible" width="30%">
+
+        <el-form ref="form" :model="ruleForm" label-width="80px">
+
+          <el-form-item label="运算符">
+            <el-select v-model="ruleForm.symbol">
+              <el-option label=">" value=">"></el-option>
+              <el-option label="<" value="<"></el-option>
+              <el-option label="=" value="=="></el-option>
+              <el-option label=">=" value=">="></el-option>
+              <el-option label="<=" value="<="></el-option>
+              <el-option label="!=" value="!="></el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item label="阈值">
+            <el-input v-model="ruleForm.parameter"></el-input>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" @click="addorUpdateRule">提交</el-button>
+            <el-button @click="ruleDialogVisible = false">取消</el-button>
+          </el-form-item>
+        </el-form>
+
+      </el-dialog>
+
+      <!--表格-->
+      <el-table :data="ruleList" stripe row-class-name="rowClassName" style="width: 100%">
+        <el-table-column prop="id" label="序号" align="center" width="60px"></el-table-column>
+        <el-table-column prop="warnId" label="规则编号" align="center" width="100px"></el-table-column>
+        <el-table-column prop="warnName" label="名称" align="center"></el-table-column>
+        <el-table-column prop="batteryType" label="电池类型" align="center"></el-table-column>
+        <el-table-column prop="formulaRateConfig.formula" label="预警规则"></el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <el-row>
+              <el-button type="primary" icon="el-icon-edit" size="mini"
+                         @click="editRule(scope.row)"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini"
+                         @click="deleteRule(scope.row)"></el-button>
+            </el-row>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+
+    <div v-show="clickMenu == 3" v-if="ruleList && ruleList.length">
+      <el-button type="primary" plain @click="openDialog">新增</el-button>
+      <el-pagination class="pagination" @size-change="ruleListHandleSizeChange"
+                     @current-change="ruleListHandleCurrentChange"
+                     :current-page="ruleCurrentPage" :page-sizes="[10, 15, 20, 50, 100]"
+                     :page-size="rulePageRequest.pageSize"
+                     layout="total, sizes, prev, pager, next, jumper" :total="ruleTotalCount">
+      </el-pagination>
+    </div>
+
+
+    <!-- 预警记录 -->
+    <!--<div v-show="clickMenu == 4" class="table-container">
+      <el-table :data="recordList" style="width: 100%" :row-class-name="RecordRowClassName">
+        <el-table-column prop="id" label="ID" align="center" width="100px"></el-table-column>
+        <el-table-column prop="hostname" label="Hostname"></el-table-column>
+        <el-table-column prop="instanceId" label="Instance ID"></el-table-column>
+        <el-table-column prop="type" label="告警类型" width="70px"></el-table-column>
+        <el-table-column prop="indicatorType" label="告警指标" width="200px"></el-table-column>
+        <el-table-column prop="triggerCondition" label="告警触发条件" width="500px"></el-table-column>
+        <el-table-column prop="triggerValue" label="告警值" width="100px"></el-table-column>
+        <el-table-column prop="occurTime" label="发生时间"></el-table-column>
+        <el-table-column prop="dealTime" label="处理时间"></el-table-column>
+        <el-table-column prop="status" label="状态" width="50px"></el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <el-row>
+              <el-button type="primary" icon="el-icon-view" size="mini"
+                         @click="readRecord(scope.row)"></el-button>
+            </el-row>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <div v-show="clickMenu == 4" class="pagination" v-if="recordList && recordList.length">
+      <el-pagination @size-change="recordListHandleSizeChange" @current-change="recordListHandleCurrentChange"
+                     :current-page="recordCurrentPage" :page-sizes="[10, 15, 20, 50, 100]"
+                     :page-size="recordPageRequest.pageSize"
+                     layout="total, sizes, prev, pager, next, jumper" :total="recordTotalCount">
+      </el-pagination>
+    </div>-->
+
+  </div>
+</div>
+
+<!-- 引入 Vue、Axios、Element UI JS 文件 -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>-->
+
+<!--<script src="./js/vue.js"></script>-->
+<!--<script src="./js/axios-0.18.0.js"></script>-->
+<!--<script src="./element-ui/lib/index.js"></script>-->
+<!--<script src="./js/chart.js"></script>-->
+
+<script>
+  new Vue({
+    el: "#app",
+    mounted() {
+      this.getCarList();
+      this.getRuleList();
+      this.getRecordList();
+
+      // 设置定时器，每隔1秒时间刷新预警记录
+      setInterval(() => {
+        if (this.clickMenu === 4) {
+          this.getRecordList();
+        }
+      }, 1000);
+    },
+    data() {
+      return {
+        url: "http://localhost:9000/api",
+
+        clickMenu: 1,//当前选中的菜单
+
+        // 分页查询请求
+        carPageRequest: {
+          "pageNumber": 1,
+          "pageSize": 20
+        },
+        rulePageRequest: {
+          "pageNumber": 1,
+          "pageSize": 10
+        },
+        recordPageRequest: {
+          "pageNumber": 1,
+          "pageSize": 10
+        },
+
+        // 当前页码,分页查询结果
+        carCurrentPage: 1,
+        carList: null,
+        carTotalCount: 0,
+
+        ruleCurrentPage: 1,
+        ruleList: null,
+        ruleTotalCount: 0,
+
+        recordCurrentPage: 1,
+        recordList: null,
+        recordTotalCount: 0,
+
+        // 添加数据对话框的状态和表单数据
+        ruleDialogVisible: false,
+        ruleForm: {
+          "name": "",
+          "indicatorName": "",
+          "type": "",
+          "symbol": "",
+          "parameter": "",
+          "aggregate": "",
+          "aggregateTime": 0,
+          // "status": 1
+        },
+
+
+        //添加数据对话框的表单数据
+        indicator: {
+          "name": "",
+          "category": "",
+          "description": "",
+        },
+        metricData: {
+          "metric": "",
+          "values": null,
+        },
+        showChartFlag: false,
+        metricDataTime: null,
+        chartTitle: null,
+        nowMetricData: null,
+      }
+    },
+    methods: {
+      // 分页查询方法
+      getCarList() {
+        let _this = this;
+        axios({
+          method: "post",
+          url: `${this.url}/car/list`,
+          data: this.carPageRequest
+        }).then(function (response) {
+          _this.carList = response.data.data.records;
+          _this.carTotalCount = response.data.data.total;
+        })
+      },
+      getRuleList() {
+        let _this = this;
+        axios({
+          method: "post",
+          url: `${this.url}/rule/list`,
+          data: this.rulePageRequest
+        }).then(function (response) {
+          _this.ruleList = response.data.data.records;
+          _this.ruleTotalCount = response.data.data.total;
+        })
+      },
+      getRecordList() {
+        let _this = this;
+        axios({
+          method: "post",
+          url: `${this.url}/warnRecord/list`,
+          data: this.recordPageRequest
+        }).then(function (response) {
+          _this.recordList = response.data.data.records;
+          _this.WarnRecordtotalcount = response.data.data.total;
+        })
+      },
+
+
+      // 分页变化
+      carListHandleSizeChange(val) {
+        this.carPageRequest.pageSize = val;
+      },
+      carListHandleCurrentChange(val) {
+        this.carCurrentPage = val;
+        this.carPageRequest.pageNumber = val;
+        this.getCarList();
+      },
+      ruleListHandleSizeChange(val) {
+        this.rulePageRequest.pageSize = val;
+      },
+      ruleListHandleCurrentChange(val) {
+        this.ruleCurrentPage = val;
+        this.rulePageRequest.pageNumber = val;
+        this.getRuleList();
+      },
+      recordListHandleSizeChange(val) {
+        this.recordPageRequest.pageSize = val;
+      },
+      recordListHandleCurrentChange(val) {
+        this.recordCurrentPage = val;
+        this.recordPageRequest.pageNumber = val;
+        this.getRecordList();
+      },
+
+
+      openDialog() {
+        //清理规则表单数据
+        this.ruleForm = {};
+        this.ruleDialogVisible = true;
+      },
+
+      addorUpdateRule() {
+        if (this.ruleForm.id) {
+          let _this = this;
+          axios({
+            method: "put",
+            url: `${this.url}/rule`,
+            data: _this.ruleForm
+          }).then(function (response) {
+            console.log(response);
+            _this.ruleDialogVisible = false;
+            _this.getRuleList();
+            // 弹出消息提示
+            _this.$message({
+              message: '恭喜你，修改成功',
+              type: 'success'
+            });
+          })
+        } else {
+          let _this = this;
+          axios({
+            method: "post",
+            url: `${this.url}/rule`,
+            data: _this.ruleForm
+          }).then(function (response) {
+            console.log(response);
+            _this.ruleDialogVisible = false;
+            _this.getRuleList();
+            // 弹出消息提示
+            _this.$message({
+              message: '恭喜你，添加成功',
+              type: 'success'
+            });
+          })
+        }
+      },
+
+      editRule(row) {
+        this.ruleForm = JSON.parse(JSON.stringify(row));
+        console.log(this.ruleForm);
+        this.ruleDialogVisible = true;
+      },
+      deleteRule(row) {
+        // console.log(row);
+        var _this = this;
+        axios({
+          method: "delete",
+          url: `${this.url}/rule/${row.id}`
+        }).then(function (response) {
+          console.log(response);
+          _this.getRuleList();
+          _this.$message({
+            message: '恭喜你，删除成功',
+            type: 'success'
+          });
+        })
+      },
+
+      readRecord(row) {
+        console.log(row);
+        let _this = this;
+        axios({
+          method: "put",
+          url: `${this.url}/warnRecord/${row.id}/read`
+        }).then(function (response) {
+          console.log(response);
+          _this.getRecordList();
+          _this.$message({
+            message: '处理成功',
+            type: 'success'
+          });
+        })
+      },
+      // 为表格的每一行设置不同样式的函数
+      rowClassName({row, rowIndex}) {
+        return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
+      },
+      RecordRowClassName({row}) {
+        return row.status === '未读' ? 'record-row-read' : '';
+      }
+    }
+  })
+
+</script>
+</body>
+
+</html>

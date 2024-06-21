@@ -3,6 +3,7 @@ package com.xiaomi.controller;
 import com.xiaomi.common.PageResult;
 import com.xiaomi.common.Result;
 import com.xiaomi.domain.dto.PageRequest;
+import com.xiaomi.domain.dto.RuleDto;
 import com.xiaomi.domain.vo.RuleVo;
 import com.xiaomi.service.RuleService;
 import io.swagger.annotations.Api;
@@ -30,21 +31,21 @@ public class RuleController {
 
     @PostMapping("/list")
     @ApiOperation("分页查询规则列表")
-    public Result<PageResult<RuleVo>> selectPageList(@RequestBody PageRequest pageRequest){
+    public Result<PageResult<RuleVo>> selectPageList(@RequestBody @Valid PageRequest pageRequest){
         pageRequest.checkParam();
         return Result.okResult(ruleService.selectPageList(pageRequest));
     }
 
     @PostMapping
     @ApiOperation("新增规则")
-    public Result<Void> insertRule(@RequestBody @Valid com.xiaomi.domain.dto.RuleDto ruleDto){
+    public Result<Void> insertRule(@RequestBody @Valid RuleDto ruleDto){
         ruleService.insertRule(ruleDto);
         return Result.okResult(null);
     }
 
     @PutMapping
     @ApiOperation("修改规则")
-    public Result<Void> updateRule(@RequestBody @Valid com.xiaomi.domain.dto.RuleDto ruleDto){
+    public Result<Void> updateRule(@RequestBody @Valid RuleDto ruleDto){
         ruleService.updateRule(ruleDto);
         return Result.okResult(null);
     }

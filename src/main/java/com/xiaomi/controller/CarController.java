@@ -33,7 +33,7 @@ public class CarController {
 
     @PostMapping("/list")
     @ApiOperation("分页查询汽车列表")
-    public Result<PageResult<CarVo>> selectPageList(@RequestBody PageRequest pageRequest){
+    public Result<PageResult<CarVo>> selectPageList(@RequestBody @Valid PageRequest pageRequest){
         pageRequest.checkParam();
         return Result.okResult(carService.selectPageList(pageRequest));
     }

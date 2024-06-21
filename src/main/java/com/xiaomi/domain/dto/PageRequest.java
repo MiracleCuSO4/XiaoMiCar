@@ -2,11 +2,15 @@ package com.xiaomi.domain.dto;
 
 import lombok.Data;
 
+import javax.validation.constraints.NotNull;
+
 @Data
 public class PageRequest {
 
+    @NotNull(message = "pageNumber不能为空")
     private Integer pageNumber;
 
+    @NotNull(message = "pageSize不能为空")
     private Integer pageSize;
 
     public void checkParam() {
