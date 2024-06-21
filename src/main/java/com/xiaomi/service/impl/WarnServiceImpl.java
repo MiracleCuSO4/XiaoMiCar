@@ -14,6 +14,7 @@ import com.xiaomi.service.CarService;
 import com.xiaomi.service.RecordService;
 import com.xiaomi.service.RuleService;
 import com.xiaomi.service.WarnService;
+import com.xiaomi.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -102,7 +103,7 @@ public class WarnServiceImpl implements WarnService {
                     warnVo.setCarId(carVo.getCarId());
                     warnVo.setBatteryType(carVo.getBatteryType());
                     warnVo.setWarnName(rule.getWarnName());
-                    warnVo.setWarnLevel(rate.getWarnLever());
+                    warnVo.setWarnLevel(rate.getWarnLever() == null ? "不报警" : rate.getWarnLever().toString());
                     resultList.add(warnVo);
                     log.warn("产生一条报警等级{}的报警,因为满足:{}", rate.getWarnLever(), description);
                 }
@@ -132,14 +133,14 @@ public class WarnServiceImpl implements WarnService {
                  *         {"operator": "<", "value": 5}
                  *       ]
                  */
-                if (!compare(value, condition.getOperator(), condition.getValue())) {
+                if (!Comparator.compare(value, condition.getOperator(), condition.getValue())) {
                     // 这个报警等级中有任何一个条件condition不满足就退出这个报警等级break
                     match = false;
                     break;
                 }
             }
-            // 找到完全匹配的报警等级,比如3<=(Mx-Mi)<5  注意不报警的规则对应的warnLever为null,如果为null就不记录
-            if (match && rate.getWarnLever() != null) {
+            // 找到完全匹配的报警等级,比如3<=(Mx-Mi)<5
+            if (match) {
                 return rate; // 跳出当前规则的判断
             }
         }
@@ -167,32 +168,6 @@ public class WarnServiceImpl implements WarnService {
         return (Double) engine.eval(formula);
     }
 
-    /**
-     * 比较 number1 operator number2的结果,比如1<=2
-     *
-     * @param number1  左侧数字
-     * @param operator 比较符号
-     * @param number2  右侧数字
-     * @return 两数字的比较结果
-     */
-    public boolean compare(double number1, String operator, double number2) {
-        switch (operator) {
-            case ">=":
-                return number1 >= number2;
-            case ">":
-                return number1 > number2;
-            case "<=":
-                return number1 <= number2;
-            case "<":
-                return number1 < number2;
-            case "==":
-                return number1 == number2;
-            case "!=":
-                return number1 != number2;
-            default:
-                throw new IllegalArgumentException("不支持的比较器:'" + operator + "',请检查公式");
-        }
-    }
 
     @PostConstruct
     private void saveRecordTask() {

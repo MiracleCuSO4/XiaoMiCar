@@ -49,9 +49,7 @@ public class CarServiceTest {
 
     @Test
     public void testSelectPageList(){
-        PageRequest pageRequest = new PageRequest();
-        pageRequest.setPageNumber(1);
-        pageRequest.setPageSize(10);
+        PageRequest pageRequest = new PageRequest(1, 10);
         PageResult<CarVo> pageResult = carService.selectPageList(pageRequest);
         System.out.println(pageResult);
     }

@@ -18,6 +18,7 @@ import com.xiaomi.domain.vo.RuleVo;
 import com.xiaomi.exception.DataNotExistException;
 import com.xiaomi.mapper.RuleMapper;
 import com.xiaomi.service.RuleService;
+import com.xiaomi.util.SafeFormulaCheck;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -94,6 +95,11 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
     @Override
     public void insertRule(RuleDto ruleDto) {
         Rule rule = BeanUtil.copyProperties(ruleDto, Rule.class);
+        String formula = rule.getFormulaRateConfig().getFormula(); // 形如"10 * ( ${Mx} - ${Mi} ) / ${Mx}"
+        // 对公式进行安全检查,防止注入攻击
+        if (!SafeFormulaCheck.isSafeFormula(formula)) {
+            throw new IllegalArgumentException("不安全的公式:" + formula);
+        }
         save(rule);
         // 删除与这个规则编号warnId相关的查询缓存
         deleteRelatedRuleCache(rule.getWarnId(), rule.getBatteryType());

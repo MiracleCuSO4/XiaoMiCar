@@ -17,5 +17,5 @@ public class WarnVo {
     private String warnName;
 
     @ApiModelProperty(value = "报警等级", required = true)
-    private Byte warnLevel;
+    private String warnLevel;
 }

@@ -3,9 +3,7 @@ package com.xiaomi.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSON;
 import com.xiaomi.WarnApplication;
-import com.xiaomi.common.Result;
 import com.xiaomi.domain.dto.RuleDto;
-import com.xiaomi.domain.po.Rule;
 import com.xiaomi.domain.rule.FormulaRateConfig;
 import com.xiaomi.domain.vo.RuleVo;
 import com.xiaomi.service.RuleService;
@@ -24,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 
 @SpringBootTest(classes = WarnApplication.class)
 @RunWith(SpringRunner.class)
-public class RuleServiceImplTest {
+public class RuleServiceTest {
 
     @Autowired
     private RuleService ruleService;
