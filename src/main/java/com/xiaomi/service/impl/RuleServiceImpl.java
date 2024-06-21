@@ -74,7 +74,7 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
 
     @Override
     public RuleVo selectByRuleId(Integer ruleId) {
-        Rule rule = getOne(Wrappers.<Rule>lambdaQuery().eq(Rule::getId, ruleId).eq(Rule::getIsDelete, 0));
+        Rule rule = getOne(Wrappers.<Rule>lambdaQuery().eq(Rule::getId, ruleId));
         if(rule == null) {
             throw new DataNotExistException("不存在规则序号ruleId为" + ruleId + "的规则");
         }
@@ -84,15 +84,11 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
     @Override
     public PageResult<RuleVo> selectPageList(PageRequest pageRequest) {
         IPage<Rule> page = new Page<>(pageRequest.getPageNumber(), pageRequest.getPageSize());
-        page = page(page, Wrappers.<Rule>lambdaQuery().eq(Rule::getIsDelete, 0).orderByAsc(Rule::getUpdateTime));
+        page = page(page, Wrappers.<Rule>lambdaQuery().orderByAsc(Rule::getUpdateTime));
         List<RuleVo> ruleVoList = page.getRecords().stream()
                 .map(rule -> BeanUtil.copyProperties(rule, RuleVo.class))
                 .collect(Collectors.toList());
-
-        PageResult<RuleVo> pageResult = new PageResult<>();
-        pageResult.setTotal(page.getTotal());
-        pageResult.setRecords(ruleVoList);
-        return pageResult;
+        return new PageResult<>(page.getTotal(), ruleVoList);
     }
 
     @Override
@@ -115,7 +111,7 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
     @Override
     public void deleteByRuleId(Integer ruleId) {
         Rule rule = getById(ruleId);
-        update(Wrappers.<Rule>lambdaUpdate().eq(Rule::getId, ruleId).set(Rule::getIsDelete, 1));
+        removeById(ruleId);
         deleteRelatedRuleCache(ruleId, rule.getBatteryType());
     }
 

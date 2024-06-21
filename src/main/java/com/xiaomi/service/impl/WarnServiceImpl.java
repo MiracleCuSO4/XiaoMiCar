@@ -4,24 +4,31 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.xiaomi.common.Result;
 import com.xiaomi.domain.dto.SignalDto;
+import com.xiaomi.domain.po.Record;
 import com.xiaomi.domain.po.Rule;
 import com.xiaomi.domain.rule.Condition;
 import com.xiaomi.domain.rule.Rate;
 import com.xiaomi.domain.vo.CarVo;
 import com.xiaomi.domain.vo.WarnVo;
 import com.xiaomi.service.CarService;
+import com.xiaomi.service.RecordService;
 import com.xiaomi.service.RuleService;
 import com.xiaomi.service.WarnService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static com.xiaomi.common.AppHttpCodeEnum.ILLEGAL_ARGUMENT;
 
@@ -34,8 +41,14 @@ public class WarnServiceImpl implements WarnService {
 
     private final RuleService ruleService;
 
+    private final RecordService recordService;
+
     // 使用js脚本引擎计算公式值
     private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
+
+    private final BlockingQueue<List<Record>> TASKS = new ArrayBlockingQueue<>(4 * 1024 * 1024); // jdk阻塞队列
+    private static final ExecutorService DATABASE_EXECUTOR = Executors.newSingleThreadExecutor(); // 单线程工厂
+
 
     /**
      * 根据请求的数据响应报警结果
@@ -46,6 +59,7 @@ public class WarnServiceImpl implements WarnService {
     public Result<List<WarnVo>> warn(List<SignalDto> dtoList) {
         boolean isTolerableBadRequest = false;
         List<WarnVo> resultList = new ArrayList<>();
+        List<Record> recordList = new ArrayList<>();
         for (SignalDto signalDto : dtoList) {
             // 根据车架编号carId获取汽车信息
             CarVo carVo = carService.selectByCarId(signalDto.getCarId());
@@ -72,12 +86,30 @@ public class WarnServiceImpl implements WarnService {
                     continue; // 忽略掉,数据清洗,跳过这个规则
                 }
                 // 检查是否需要报警
-                WarnVo warnVo = checkIfNeedsWarn(carVo, rule, value);
-                if(warnVo != null){
+                Rate rate = checkIfNeedsWarn(rule, value);
+                if(rate != null){
+                    String description = rule.generateDescription(value, rate);
+                    // 产生报警记录
+                    Record record = new Record();
+                    record.setVid(carVo.getVid());
+                    record.setRuleId(rule.getId());
+                    record.setWarnLevel(rate.getWarnLever());
+                    record.setMessage(String.format("规则编号:%s,%s,%s,公式:%s,%s",
+                            rule.getWarnId(), rule.getWarnName(), rule.getBatteryType(), rule.getFormulaRateConfig().getFormula(), description));
+                    recordList.add(record);
+                    // 产生报警信息
+                    WarnVo warnVo = new WarnVo();
+                    warnVo.setCarId(carVo.getCarId());
+                    warnVo.setBatteryType(carVo.getBatteryType());
+                    warnVo.setWarnName(rule.getWarnName());
+                    warnVo.setWarnLevel(rate.getWarnLever());
                     resultList.add(warnVo);
+                    log.warn("产生一条报警等级{}的报警,因为满足:{}", rate.getWarnLever(), description);
                 }
             }
         }
+        // 队列存放预警记录,由独立线程写入数据库
+        TASKS.add(recordList);
         if(isTolerableBadRequest){
             return Result.errorResult(ILLEGAL_ARGUMENT.getCode(), "缺少计算公式的信号参数或者公式有误,已跳过无法计算的公式", resultList);
         } else {
@@ -87,12 +119,11 @@ public class WarnServiceImpl implements WarnService {
 
     /**
      * 根据计算值和规则条件判断是否需要报警
-     * @param carVo 车辆信息
      * @param rule 一条规则
      * @param value 这个车辆的信号数据使用这个规则的公式计算出的结果
-     * @return 报警记录,如果无需报警返回null
+     * @return 返回对应的报警等级
      */
-    public WarnVo checkIfNeedsWarn(CarVo carVo, Rule rule, double value) {
+    public Rate checkIfNeedsWarn(Rule rule, double value) {
         for (Rate rate : rule.getFormulaRateConfig().getRate()) {
             boolean match = true;
             for (Condition condition : rate.getCondition()) {
@@ -109,15 +140,7 @@ public class WarnServiceImpl implements WarnService {
             }
             // 找到完全匹配的报警等级,比如3<=(Mx-Mi)<5  注意不报警的规则对应的warnLever为null,如果为null就不记录
             if (match && rate.getWarnLever() != null) {
-                // 产生报警信息
-                WarnVo warnVo = new WarnVo();
-                warnVo.setCarId(carVo.getCarId());
-                warnVo.setBatteryType(carVo.getBatteryType());
-                warnVo.setWarnName(rule.getWarnName());
-                warnVo.setWarnLevel(rate.getWarnLever());
-                log.warn("产生一条报警:{},因为满足规则编号:{},电池类型:{},报警等级:{}的公式:{}",
-                        warnVo, rule.getWarnId(), rule.getBatteryType(), rate.getWarnLever(), rule.getDescription(value, rate));
-                return warnVo; // 跳出当前规则的判断
+                return rate; // 跳出当前规则的判断
             }
         }
         return null; // 无需报警
@@ -169,5 +192,23 @@ public class WarnServiceImpl implements WarnService {
             default:
                 throw new IllegalArgumentException("不支持的比较器:'" + operator + "',请检查公式");
         }
+    }
+
+    @PostConstruct
+    private void saveRecordTask() {
+        DATABASE_EXECUTOR.submit(() -> {
+            log.info("已启动独立线程准备保存预警记录到数据库");
+            List<Record> recordList = null;
+            while (true) {
+                try {
+                    recordList = TASKS.take(); //从阻塞队列获取待写入的数据
+                    recordService.saveBatch(recordList);
+                    log.info("保存报警记录至数据库成功");
+                } catch (Exception e) {
+                    log.error("保存报警记录至数据库失败,数据为{}", recordList);
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }

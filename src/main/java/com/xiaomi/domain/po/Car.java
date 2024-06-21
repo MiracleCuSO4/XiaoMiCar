@@ -1,7 +1,7 @@
 package com.xiaomi.domain.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -43,5 +43,6 @@ public class Car implements Serializable {
     private Timestamp updateTime;
 
     @ApiModelProperty(value = "0=未删除,1=逻辑删除")
+    @TableLogic(value = "0", delval = "1")
     private Byte isDelete;
 }

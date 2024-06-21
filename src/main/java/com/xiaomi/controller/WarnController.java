@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/warn")
 @RequiredArgsConstructor
-@Api("预警接口")
+@Api(tags = "预警信号接收处理接口")
 @Validated
 public class WarnController {
 

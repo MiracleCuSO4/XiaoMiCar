@@ -17,7 +17,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/rule")
 @RequiredArgsConstructor
-@Api("规则接口")
+@Api(tags = "规则接口")
 @Validated
 public class RuleController {
 

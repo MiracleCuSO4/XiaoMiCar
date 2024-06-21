@@ -45,7 +45,7 @@ public class CarServiceImpl extends ServiceImpl<CarMapper, Car> implements CarSe
         if(StrUtil.isNotBlank(json)){
             return JSON.parseObject(json, CarVo.class);
         }
-        Car car = getOne(Wrappers.<Car>lambdaQuery().eq(Car::getCarId, carId).eq(Car::getIsDelete, 0));
+        Car car = getOne(Wrappers.<Car>lambdaQuery().eq(Car::getCarId, carId));
         if(car == null){
             throw new DataNotExistException("不存在" + carId + "的车架id");
         }
@@ -70,15 +70,14 @@ public class CarServiceImpl extends ServiceImpl<CarMapper, Car> implements CarSe
         Car car = BeanUtil.copyProperties(carDto, Car.class);
         update(car, Wrappers.<Car>lambdaUpdate()
                 .eq(StrUtil.isNotBlank(vid), Car::getVid, vid)
-                .eq(Car::getCarId, carDto.getCarId())
-                .eq(Car::getIsDelete, 0));
+                .eq(Car::getCarId, carDto.getCarId()));
         String carCacheKey = String.format(RedisConstant.CAR_KEY, carDto.getCarId());
         stringRedisTemplate.delete(carCacheKey);
     }
 
     @Override
     public void deleteByCarId(Integer carId) {
-        update(Wrappers.<Car>lambdaUpdate().eq(Car::getCarId, carId).set(Car::getIsDelete, 1));
+        remove(Wrappers.<Car>lambdaQuery().eq(Car::getCarId, carId));
         String carCacheKey = String.format(RedisConstant.CAR_KEY, carId);
         stringRedisTemplate.delete(carCacheKey);
     }
@@ -86,14 +85,11 @@ public class CarServiceImpl extends ServiceImpl<CarMapper, Car> implements CarSe
     @Override
     public PageResult<CarVo> selectPageList(PageRequest pageRequest) {
         IPage<Car> page = new Page<>(pageRequest.getPageNumber(), pageRequest.getPageSize());
-        page = page(page, Wrappers.<Car>lambdaQuery().eq(Car::getIsDelete, 0).orderByAsc(Car::getCarId));
+        page = page(page, Wrappers.<Car>lambdaQuery().orderByAsc(Car::getCarId));
         List<CarVo> carVoList = page.getRecords().stream()
                 .map(car -> BeanUtil.copyProperties(car, CarVo.class))
                 .collect(Collectors.toList());
 
-        PageResult<CarVo> pageResult = new PageResult<>();
-        pageResult.setTotal(page.getTotal());
-        pageResult.setRecords(carVoList);
-        return pageResult;
+        return new PageResult<>(page.getTotal(), carVoList);
     }
 }

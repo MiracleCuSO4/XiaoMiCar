@@ -4,7 +4,6 @@ import com.xiaomi.common.PageResult;
 import com.xiaomi.common.Result;
 import com.xiaomi.domain.dto.CarDto;
 import com.xiaomi.domain.dto.PageRequest;
-import com.xiaomi.domain.po.Car;
 import com.xiaomi.domain.vo.CarVo;
 import com.xiaomi.service.CarService;
 import io.swagger.annotations.Api;
@@ -14,12 +13,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/car")
 @RequiredArgsConstructor
-@Api("汽车接口")
+@Api(tags = "汽车接口")
 @Validated
 public class CarController {
 

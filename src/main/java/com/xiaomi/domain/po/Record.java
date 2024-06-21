@@ -2,6 +2,7 @@ package com.xiaomi.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -31,7 +32,10 @@ public class Record implements Serializable {
     private Integer ruleId;
 
     @ApiModelProperty(value = "报警等级")
-    private Integer warnLevel;
+    private Byte warnLevel;
+
+    @ApiModelProperty(value = "报警信息")
+    private String message;
 
     @ApiModelProperty(value = "发生时间")
     private Timestamp occurTime;
@@ -40,5 +44,6 @@ public class Record implements Serializable {
     private Timestamp dealTime;
 
     @ApiModelProperty(value = "0=未删除,1=逻辑删除")
+    @TableLogic(value = "0", delval = "1")
     private Byte isDelete;
 }

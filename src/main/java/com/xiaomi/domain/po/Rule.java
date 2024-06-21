@@ -1,9 +1,6 @@
 package com.xiaomi.domain.po;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import com.xiaomi.domain.rule.Condition;
 import com.xiaomi.domain.rule.FormulaRateConfig;
@@ -50,9 +47,10 @@ public class Rule implements Serializable {
     private Timestamp updateTime;
 
     @ApiModelProperty(value = "0=未删除,1=逻辑删除")
+    @TableLogic(value = "0", delval = "1")
     private Byte isDelete;
 
-    public String getDescription(double value, Rate rate){
+    public String generateDescription(double value, Rate rate){
         StringBuilder stringBuilder = new StringBuilder();
         List<Condition> conditionList = rate.getCondition();
         for (Condition condition : conditionList) {
