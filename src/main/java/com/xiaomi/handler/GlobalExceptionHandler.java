@@ -67,13 +67,13 @@ public class GlobalExceptionHandler {
         return Result.errorResult(SERVER_ERROR, ex.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Result<?> handlerException(Exception ex) {
-        log.error("异常: {}", ex.getMessage());
-        ex.printStackTrace();
-        return Result.errorResult(SERVER_ERROR, ex.getMessage());
-    }
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    public Result<?> handlerException(Exception ex) {
+//        log.error("异常: {}", ex.getMessage());
+//        ex.printStackTrace();
+//        return Result.errorResult(SERVER_ERROR, ex.getMessage());
+//    }
 
 
 

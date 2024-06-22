@@ -5,15 +5,42 @@ spring:
     name: XiaoMiCar
   profiles:
     active: dev
+#  本地配置
+#  datasource:
+#    driver-class-name: com.mysql.jdbc.Driver
+#    url: jdbc:mysql://127.0.0.1:3306/xiaomi_car?useSSL=false&serverTimezone=UTC
+#    username: xiaomi_car_warn_service
+#    password: XiaoMi1fas6geYWTRHs6s2fdshs9d22da65Wt126ezh
+#  redis:
+#    host: 127.0.0.1
+#    port: 6379
+#    password:
+#  jackson:
+#    time-zone: Asia/Shanghai
+
+#  本地连线上配置
+#  datasource:
+#    driver-class-name: com.mysql.jdbc.Driver
+#    url: jdbc:mysql://111.230.66.66:14523/xiaomi_car?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+#    username: xiaomi_car_warn_service
+#    password: XiaoMi1f16as3Dsdf46TRItsd54S7ESy12F6ezh
+#  redis:
+#    host: 111.230.66.66
+#    port: 14379
+#    password: VSERTYRjydgsgew5712sage4s34Grg6
+#  jackson:
+#    time-zone: Asia/Shanghai
+
+#  线上配置
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/xiaomi_car?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://mysql:3306/xiaomi_car?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
     username: xiaomi_car_warn_service
-    password: XiaoMi1fas6geYWTRHs6s2fdshs9d22da65Wt126ezh
+    password: XiaoMi1f16as3Dsdf46TRItsd54S7ESy12F6ezh
   redis:
-    host: 127.0.0.1
+    host: redis
     port: 6379
-    password:
+    password: VSERTYRjydgsgew5712sage4s34Grg6
   jackson:
     time-zone: Asia/Shanghai
 

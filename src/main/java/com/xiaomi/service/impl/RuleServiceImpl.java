@@ -55,9 +55,10 @@ public class RuleServiceImpl extends ServiceImpl<RuleMapper, Rule> implements Ru
         if (StrUtil.isNotBlank(json)){
             ruleList = JSON.parseObject(json, new TypeReference<List<Rule>>(){});
         } else {
+
             ruleList = ruleMapper.selectList(Wrappers.<Rule>lambdaQuery()
                     .eq(warnId != null, Rule::getWarnId, warnId)
-                    .eq(Rule::getBatteryType, batteryType));
+                    .eq(Rule::getBatteryType, batteryType)); // 这个在本地用本地数据库没问题,在本地连服务器数据库就查不到数据
             stringRedisTemplate.opsForValue().set(ruleQueryKey, JSON.toJSONString(ruleList), RedisConstant.TTL, TimeUnit.MILLISECONDS);
         }
         return CollectionUtil.emptyIfNull(ruleList);

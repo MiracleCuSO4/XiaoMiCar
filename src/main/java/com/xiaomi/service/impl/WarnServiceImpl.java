@@ -110,7 +110,9 @@ public class WarnServiceImpl implements WarnService {
             }
         }
         // 队列存放预警记录,由独立线程写入数据库
-        TASKS.add(recordList);
+        if(recordList.size() > 0){
+            TASKS.add(recordList);
+        }
         if(isTolerableBadRequest){
             return Result.errorResult(ILLEGAL_ARGUMENT.getCode(), "缺少计算公式的信号参数或者公式有误,已跳过无法计算的公式", resultList);
         } else {
