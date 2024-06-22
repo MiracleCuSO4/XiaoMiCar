@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>展示页面</title>
+  <title>小米汽车电池预警系统</title>
+  <link rel="icon" href="https://s1.xiaomiev.com/website-evcar/favicon.ico">
 
   <!-- 引入 Element UI 样式 -->
   <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
@@ -24,19 +25,40 @@
 
     /* 侧边栏样式 */
     .sidebar {
-      width: 200px;
-      background-color: rgb(238, 241, 246);
-      border-right: 1px solid #eee;
+      padding-top: 20px;
+      width: 160px;
+      /*background-color: rgb(238, 241, 246);*/
+      /*border-right: 1px solid #eee;*/
       box-sizing: border-box;
+      position: relative;
     }
 
-    .sidebar-menu {
-      padding-top: 20px;
-    }
 
     .sidebar-menu-item {
+      font-size: 16px;
       margin-bottom: 10px;
       cursor: pointer;
+    }
+
+    .sidebar-bottom {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .sidebar-bottom-item {
+      margin-bottom: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .sidebar-bottom-item i {
+      margin-right: 6px; /* 增加图标和文字之间的距离 */
     }
 
     /* 主内容区样式 */
@@ -50,33 +72,35 @@
     .table-container {
       margin-top: 20px;
       padding: 20px;
+      width: calc(100% - 40px); /* 减去 padding 的宽度 */
+      box-sizing: border-box; /* 包含 padding 和 border 在内 */
+      overflow-x: auto; /* 确保在需要时内容可以滚动 */
     }
 
-    .table-container {
-      margin-top: 20px;
+    .button-pagination-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     /* 分页样式 */
     .pagination {
-      margin-top: 20px;
-      text-align: right;
+      margin: 0;
     }
 
-    /* 偶数行样式 */
+    /* 偶数行背景色 */
     .even-row {
-      background-color: #f5f5f5;
-      /* 设置偶数行的背景色 */
+      background-color: #f1f1f1 !important;
     }
 
-    /* 奇数行样式 */
+    /* 奇数行背景色 */
     .odd-row {
-      background-color: #ffffff;
-      /* 设置奇数行的背景色 */
+      background-color: #ffffff !important;
     }
 
-    .record-row-read {
-      background-color: #F9EAAB !important;
-      /* 设置已读状态行的背景色 */
+    /* 设置未读状态行的背景色 */
+    .record-row-unread {
+      background-color: #F9EAAB55 !important;
     }
   </style>
 </head>
@@ -85,108 +109,226 @@
 
 <div id="app">
   <div class="sidebar">
-    <el-menu class="sidebar-menu">
+    <!-- 侧边栏上方菜单 -->
+    <el-menu @select="handelMenuChange">
 
-      <el-submenu index="1">
+      <el-menu-item index="1">
         <template slot="title">
           <div class="sidebar-menu-item" @click="clickMenu = 1">
-            <i class="el-icon-s-platform"></i>
+            <i class="el-icon-truck"></i>
             小米汽车
           </div>
         </template>
-      </el-submenu>
+      </el-menu-item>
 
-      <el-submenu index="2">
+      <el-menu-item index="2">
         <template slot="title">
           <div class="sidebar-menu-item" @click="clickMenu = 2">
-            <i class="el-icon-setting"></i>
+            <i class="el-icon-menu"></i>
             汽车数据
           </div>
         </template>
-      </el-submenu>
+      </el-menu-item>
 
-      <el-submenu index="3">
+      <el-menu-item index="3">
         <template slot="title">
           <div class="sidebar-menu-item" @click="clickMenu = 3">
-            <i class="el-icon-menu"></i>
+            <i class="el-icon-setting"></i>
             预警规则
           </div>
         </template>
-      </el-submenu>
+      </el-menu-item>
 
-      <!--<el-submenu index="4">
+      <el-menu-item index="4">
         <template slot="title">
           <div class="sidebar-menu-item" @click="clickMenu = 4">
-            <i class="el-icon-setting"></i>
+            <i class="el-icon-s-opportunity"></i>
             预警记录
           </div>
         </template>
-      </el-submenu>-->
+      </el-menu-item>
 
     </el-menu>
+
+    <!-- 侧边栏底部 -->
+    <div class="sidebar-bottom">
+      <a href="http://111.230.66.66:9000/doc.html#/default/预警信号接收处理接口/warnUsingPOST" target="_blank"
+         class="sidebar-bottom-item">
+        <i class="el-icon-document"></i>
+        <span>knife4j</span>
+      </a>
+
+      <a href="https://github.com/MiracleCuSO4/XiaoMiCar" target="_blank" class="sidebar-bottom-item">
+        <svg height="20" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true"
+             class="octicon octicon-mark-github v-align-middle color-fg-default">
+          <path
+            d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+        </svg>
+        <span>github</span>
+      </a>
+    </div>
+
+
   </div>
 
   <div class="main-content">
 
     <!-- 首页内容 -->
     <div v-show="clickMenu == 1">
-      <img width="100%" alt="小米汽车"
-           src="https://s1.xiaomiev.com/activity-outer-assets/0328/images/home/section1x1281.jpg?">
-      <a href="https://www.xiaomiev.com/" target="_blank">小米汽车官网</a>
+      <h1>小米汽车电池预警系统</h1>
+      <a href="https://www.xiaomiev.com/" target="_blank">
+        <img width="100%" alt="小米汽车"
+             src="https://s1.xiaomiev.com/activity-outer-assets/0328/images/home/section1x1281.jpg">
+      </a>
     </div>
+
 
     <!-- 汽车数据表格 -->
     <div v-show="clickMenu == 2">
-      <el-table :data="carList" stripe style="width: 100%">
+      <!--添加数据对话框表单-->
+      <el-dialog title="编辑汽车信息" :visible.sync="carDialogVisible" width="30%">
+        <el-form ref="form" :model="carForm" label-width="100px">
+          <el-form-item label="vid" prop="vid" style="width: 80%">
+            <el-input v-model="carForm.vid" disabled placeholder="车辆唯一识别码由系统生成"></el-input>
+          </el-form-item>
+
+          <el-form-item label="车架编号" prop="carId">
+            <el-input-number v-model="carForm.carId" :min="1"></el-input-number>
+          </el-form-item>
+
+          <el-form-item label="电池类型" prop="batteryType">
+            <el-radio-group v-model="carForm.batteryType" placeholder="请选择电池类型">
+              <el-radio-button label="三元电池" value="三元电池"></el-radio-button>
+              <el-radio-button label="铁锂电池" value="铁锂电池"></el-radio-button>
+            </el-radio-group>
+            <el-input v-model="carForm.batteryType" placeholder="或输入其他电池类型" style="width: 60%"></el-input>
+          </el-form-item>
+
+          <el-form-item label="电池健康(%)" prop="batteryHealth">
+            <el-input-number v-model="carForm.batteryHealth" :min="0" :max="100"></el-input-number>
+          </el-form-item>
+
+          <el-form-item label="总里程(km)" prop="totalDistance">
+            <el-input-number v-model="carForm.totalDistance" :min="0"></el-input-number>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" @click="submitCar">提交</el-button>
+            <el-button @click="carDialogVisible = false">取消</el-button>
+          </el-form-item>
+        </el-form>
+      </el-dialog>
+
+      <!--表格-->
+      <el-table :data="carList" class="table-container" :row-class-name="carRowClassName">
         <el-table-column prop="vid" label="vid" align="center"></el-table-column>
-        <el-table-column prop="carId" label="车架id"></el-table-column>
-        <el-table-column prop="batteryType" label="电池类型"></el-table-column>
-        <el-table-column prop="batteryHealth" label="电池健康状态(%)"></el-table-column>
-        <el-table-column prop="totalDistance" label="总里程(km)"></el-table-column>
+        <el-table-column prop="carId" label="车架id" align="center"></el-table-column>
+        <el-table-column prop="batteryType" label="电池类型" align="center"></el-table-column>
+        <el-table-column prop="batteryHealth" label="电池健康状态(%)" align="center"></el-table-column>
+        <el-table-column prop="totalDistance" label="总里程(km)" align="center"></el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <el-row>
+              <el-button type="primary" icon="el-icon-edit" size="mini"
+                         @click="editCar(scope.row)"></el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini"
+                         @click="removeCar(scope.row)"></el-button>
+            </el-row>
+          </template>
+        </el-table-column>
       </el-table>
-    </div>
-    <div v-show="clickMenu == 2" class="pagination" v-if="carList && carList.length">
-      <el-pagination @size-change="carListHandleSizeChange" @current-change="carListHandleCurrentChange"
-                     :current-page="carCurrentPage" :page-sizes="[10, 15, 20, 50, 100]"
-                     :page-size="carPageRequest.pageSize"
-                     layout="total, sizes, prev, pager, next, jumper" :total="carTotalCount">
-      </el-pagination>
+
+      <!--新增与分页-->
+      <div class="button-pagination-container">
+        <el-button type="primary" plain @click="addCar">新增汽车</el-button>
+        <el-pagination v-if="carList && carList.length" class="pagination"
+                       @size-change="carListHandleSizeChange" @current-change="carListHandleCurrentChange"
+                       :current-page="carCurrentPage" :page-sizes="[10, 15, 20, 50, 100]"
+                       :page-size="carPageRequest.pageSize"
+                       layout="total, sizes, prev, pager, next, jumper" :total="carTotalCount">
+        </el-pagination>
+      </div>
     </div>
 
 
     <!-- 预警规则 -->
-    <div v-show="clickMenu == 3" class="table-container">
-
-      <!--添加数据对话框表单-->
-      <el-dialog title="编辑规则信息" :visible.sync="ruleDialogVisible" width="30%">
-
+    <div v-show="clickMenu == 3">
+      <!-- 规则编辑对话框 -->
+      <el-dialog title="编辑规则信息" :visible.sync="ruleDialogVisible" width="50%">
         <el-form ref="form" :model="ruleForm" label-width="80px">
-
-          <el-form-item label="运算符">
-            <el-select v-model="ruleForm.symbol">
-              <el-option label=">" value=">"></el-option>
-              <el-option label="<" value="<"></el-option>
-              <el-option label="=" value="=="></el-option>
-              <el-option label=">=" value=">="></el-option>
-              <el-option label="<=" value="<="></el-option>
-              <el-option label="!=" value="!="></el-option>
-            </el-select>
+          <el-form-item label="规则序号" style="width: 40%">
+            <el-input v-model="ruleForm.id" disabled placeholder="id由系统生成"></el-input>
+          </el-form-item>
+          <el-form-item label="规则编号">
+            <el-input-number v-model="ruleForm.warnId" :min="1"></el-input-number>
+          </el-form-item>
+          <el-form-item label="规则名称" style="width: 60%">
+            <el-input v-model="ruleForm.warnName"></el-input>
           </el-form-item>
 
-          <el-form-item label="阈值">
-            <el-input v-model="ruleForm.parameter"></el-input>
+          <el-form-item label="电池类型">
+            <el-radio-group v-model="ruleForm.batteryType" placeholder="请选择电池类型">
+              <el-radio-button label="三元电池" value="三元电池"></el-radio-button>
+              <el-radio-button label="铁锂电池" value="铁锂电池"></el-radio-button>
+            </el-radio-group>
+            <el-input v-model="ruleForm.batteryType" placeholder="或输入其他电池类型" style="width: 30%"></el-input>
+          </el-form-item>
+
+          <el-form-item label="公式">
+            <el-tooltip content="支持+-*/()运算,可选的参数有Mx, Mi, Ix, Ii" placement="top">
+              <el-input v-model="ruleForm.formulaRateConfig.formula" placeholder="例如: ${Mx} - ${Mi}" style="width: 80%"></el-input>
+            </el-tooltip>
+          </el-form-item>
+
+          <!-- 预警等级配置 -->
+          <el-form-item label="配置">
+            <el-table :data="sortedRate" border>
+              <el-table-column prop="warnLever" label="预警等级" align="center" width="120">
+                <template slot-scope="scope">
+                  <el-select v-model="scope.row.warnLever" placeholder="选择预警等级">
+                    <el-option :label="'无'" :value="null"></el-option>
+                    <el-option v-for="n in 11" :key="n" :label="n - 1" :value="n - 1"></el-option>
+                  </el-select>
+                </template>
+              </el-table-column>
+
+              <el-table-column label="成立条件" align="center">
+                <template slot-scope="scope">
+                  <div v-for="(condition, cIndex) in scope.row.condition" :key="cIndex">
+                    <el-select v-model="condition.operator" placeholder="选择操作符" style="width: 80px;">
+                      <el-option label=">=" value=">="></el-option>
+                      <el-option label=">" value=">"></el-option>
+                      <el-option label="<=" value="<="></el-option>
+                      <el-option label="<" value="<"></el-option>
+                      <el-option label="==" value="=="></el-option>
+                      <el-option label="!=" value="!="></el-option>
+                    </el-select>
+                    <el-input v-model="condition.value" placeholder="输入值" style="width: 120px;"></el-input>
+                    <el-button type="danger" plain icon="el-icon-delete" size="mini"
+                               @click="removeCondition(scope.$index, cIndex)"></el-button>
+                  </div>
+                  <el-button type="primary" plain size="mini" @click="addCondition(scope.$index)">添加条件</el-button>
+                </template>
+              </el-table-column>
+
+              <el-table-column label="操作" align="center" width="120">
+                <template slot-scope="scope">
+                  <el-button type="danger" plain icon="el-icon-delete" @click="removeRate(scope.$index)"></el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-button type="primary" plain size="small" @click="addRate">添加预警等级</el-button>
           </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" @click="addorUpdateRule">提交</el-button>
+            <el-button type="primary" @click="submitRule">提交</el-button>
             <el-button @click="ruleDialogVisible = false">取消</el-button>
           </el-form-item>
         </el-form>
-
       </el-dialog>
 
       <!--表格-->
-      <el-table :data="ruleList" stripe row-class-name="rowClassName" style="width: 100%">
+      <el-table :data="ruleList" class="table-container" :row-class-name="ruleRowClassName">
         <el-table-column prop="id" label="序号" align="center" width="60px"></el-table-column>
         <el-table-column prop="warnId" label="规则编号" align="center" width="100px"></el-table-column>
         <el-table-column prop="warnName" label="名称" align="center"></el-table-column>
@@ -198,54 +340,59 @@
               <el-button type="primary" icon="el-icon-edit" size="mini"
                          @click="editRule(scope.row)"></el-button>
               <el-button type="danger" icon="el-icon-delete" size="mini"
-                         @click="deleteRule(scope.row)"></el-button>
+                         @click="removeRule(scope.row)"></el-button>
             </el-row>
           </template>
         </el-table-column>
       </el-table>
-    </div>
 
-    <div v-show="clickMenu == 3" v-if="ruleList && ruleList.length">
-      <el-button type="primary" plain @click="openDialog">新增</el-button>
-      <el-pagination class="pagination" @size-change="ruleListHandleSizeChange"
-                     @current-change="ruleListHandleCurrentChange"
-                     :current-page="ruleCurrentPage" :page-sizes="[10, 15, 20, 50, 100]"
-                     :page-size="rulePageRequest.pageSize"
-                     layout="total, sizes, prev, pager, next, jumper" :total="ruleTotalCount">
-      </el-pagination>
+      <!--新增与分页-->
+      <div class="button-pagination-container">
+        <el-button type="primary" plain @click="addRule">新增规则</el-button>
+        <el-pagination v-if="ruleList && ruleList.length" class="pagination"
+                       @size-change="ruleListHandleSizeChange" @current-change="ruleListHandleCurrentChange"
+                       :current-page="ruleCurrentPage" :page-sizes="[5, 10, 15, 20, 50]"
+                       :page-size="rulePageRequest.pageSize"
+                       layout="total, sizes, prev, pager, next, jumper" :total="ruleTotalCount">
+        </el-pagination>
+      </div>
     </div>
 
 
     <!-- 预警记录 -->
-    <!--<div v-show="clickMenu == 4" class="table-container">
-      <el-table :data="recordList" style="width: 100%" :row-class-name="RecordRowClassName">
-        <el-table-column prop="id" label="ID" align="center" width="100px"></el-table-column>
-        <el-table-column prop="hostname" label="Hostname"></el-table-column>
-        <el-table-column prop="instanceId" label="Instance ID"></el-table-column>
-        <el-table-column prop="type" label="告警类型" width="70px"></el-table-column>
-        <el-table-column prop="indicatorType" label="告警指标" width="200px"></el-table-column>
-        <el-table-column prop="triggerCondition" label="告警触发条件" width="500px"></el-table-column>
-        <el-table-column prop="triggerValue" label="告警值" width="100px"></el-table-column>
-        <el-table-column prop="occurTime" label="发生时间"></el-table-column>
-        <el-table-column prop="dealTime" label="处理时间"></el-table-column>
-        <el-table-column prop="status" label="状态" width="50px"></el-table-column>
-        <el-table-column label="操作" align="center">
+    <div v-show="clickMenu == 4">
+      <!-- 表格 -->
+      <el-table :data="recordList" class="table-container" :row-class-name="recordRowClassName">
+        <el-table-column prop="id" label="id" align="center" width="80px"></el-table-column>
+        <el-table-column prop="vid" label="vid" align="center"></el-table-column>
+        <el-table-column prop="ruleId" label="规则序号" align="center" width="60px"></el-table-column>
+        <el-table-column prop="warnLevel" label="预警等级" align="center" width="60px"></el-table-column>
+        <el-table-column prop="message" label="预警详情" align="center" width="400px"></el-table-column>
+        <el-table-column prop="occurTime" label="发生时间" align="center" :formatter="formatRecordDate"
+                         width="130px"></el-table-column>
+        <el-table-column prop="dealTime" label="处理时间" align="center" :formatter="formatRecordDate"
+                         width="130px"></el-table-column>
+        <el-table-column label="处理" align="center">
           <template slot-scope="scope">
             <el-row>
-              <el-button type="primary" icon="el-icon-view" size="mini"
-                         @click="readRecord(scope.row)"></el-button>
+              <el-button v-if="!scope.row.dealTime" plain type="success" icon="el-icon-check" circle size="small"
+                         @click="updateMarkRecordAsReadApi(scope.row)">
+              </el-button>
+              <el-button v-else disabled type="success" icon="el-icon-check" circle size="small"></el-button>
             </el-row>
           </template>
         </el-table-column>
       </el-table>
-    </div>
-    <div v-show="clickMenu == 4" class="pagination" v-if="recordList && recordList.length">
-      <el-pagination @size-change="recordListHandleSizeChange" @current-change="recordListHandleCurrentChange"
-                     :current-page="recordCurrentPage" :page-sizes="[10, 15, 20, 50, 100]"
+
+      <!--分页-->
+      <el-pagination v-if="recordList && recordList.length" class="pagination"
+                     @size-change="recordListHandleSizeChange" @current-change="recordListHandleCurrentChange"
+                     :current-page="recordCurrentPage" :page-sizes="[5, 10, 15, 20, 50]"
                      :page-size="recordPageRequest.pageSize"
                      layout="total, sizes, prev, pager, next, jumper" :total="recordTotalCount">
       </el-pagination>
-    </div>-->
+
+    </div>
 
   </div>
 </div>
@@ -265,27 +412,37 @@
   new Vue({
     el: "#app",
     mounted() {
-      this.getCarList();
-      this.getRuleList();
-      this.getRecordList();
+      this.selectCarListApi();
+      this.selectRuleListApi();
+      this.selectRecordListApi();
 
-      // 设置定时器，每隔1秒时间刷新预警记录
+      // 设置定时器,刷新预警记录
       setInterval(() => {
         if (this.clickMenu === 4) {
-          this.getRecordList();
+          this.selectRecordListApi();
         }
-      }, 1000);
+      }, 3000);
+    },
+    computed: {
+      sortedRate() {
+        return this.ruleForm.formulaRateConfig.rate.slice().sort((a, b) => {
+          if (a.warnLever === null) return 1;
+          if (b.warnLever === null) return -1;
+          return a.warnLever - b.warnLever;
+        });
+      }
     },
     data() {
       return {
-        url: "http://localhost:9000/api",
+        url: "http://111.230.66.66:9000/api",
+        // url: "http://127.0.0.1:9000/api",
 
         clickMenu: 1,//当前选中的菜单
 
         // 分页查询请求
         carPageRequest: {
           "pageNumber": 1,
-          "pageSize": 20
+          "pageSize": 10
         },
         rulePageRequest: {
           "pageNumber": 1,
@@ -297,51 +454,60 @@
         },
 
         // 当前页码,分页查询结果
-        carCurrentPage: 1,
-        carList: null,
-        carTotalCount: 0,
-
-        ruleCurrentPage: 1,
-        ruleList: null,
-        ruleTotalCount: 0,
-
-        recordCurrentPage: 1,
-        recordList: null,
-        recordTotalCount: 0,
+        carCurrentPage: 1, carList: null, carTotalCount: 0,
+        ruleCurrentPage: 1, ruleList: null, ruleTotalCount: 0,
+        recordCurrentPage: 1, recordList: null, recordTotalCount: 0,
 
         // 添加数据对话框的状态和表单数据
+        carDialogVisible: false,
+        carDialogType: "post", // post or put
+        carForm: {
+          "batteryHealth": 100,
+          "batteryType": null,
+          "carId": null,
+          "totalDistance": null,
+          "vid": null
+        },
+
         ruleDialogVisible: false,
+        ruleDialogType: "post", // post or put
         ruleForm: {
-          "name": "",
-          "indicatorName": "",
-          "type": "",
-          "symbol": "",
-          "parameter": "",
-          "aggregate": "",
-          "aggregateTime": 0,
-          // "status": 1
+          "id": null,
+          "warnId": null,
+          "warnName": null,
+          "batteryType": null,
+          "formulaRateConfig": {
+            "formula": null,
+            "rate": [
+              {
+                "warnLever": 0,
+                "condition": [
+                  {
+                    "operator": ">=",
+                    "value": 10.0
+                  }
+                ]
+              },
+              {
+                "warnLever": null,
+                "condition": [
+                  {
+                    "operator": "<",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          }
         },
 
-
-        //添加数据对话框的表单数据
-        indicator: {
-          "name": "",
-          "category": "",
-          "description": "",
-        },
-        metricData: {
-          "metric": "",
-          "values": null,
-        },
-        showChartFlag: false,
-        metricDataTime: null,
-        chartTitle: null,
-        nowMetricData: null,
       }
     },
     methods: {
-      // 分页查询方法
-      getCarList() {
+      // 说明:为了区分,所有真正发起请求的方法前缀为"insert/delete/update/select",后缀为"Api". 其他的方法都是响应事件处理
+
+      // 汽车api
+      selectCarListApi() {
         let _this = this;
         axios({
           method: "post",
@@ -352,7 +518,90 @@
           _this.carTotalCount = response.data.data.total;
         })
       },
-      getRuleList() {
+      insertOrUpdateCarApi(carForm) {
+        let _this = this;
+        axios({
+          method: this.carDialogType,
+          url: `${this.url}/car`,
+          data: carForm
+        }).then((response) => {
+          _this.selectCarListApi();
+          if (response.data.status === 200) {
+            this.resetCarForm();
+            _this.$message({
+              message: '编辑成功',
+              type: 'success'
+            });
+          }
+        }).catch(error => {
+          console.log(error);
+          _this.$message.error('编辑失败,' + error.response.data.msg);
+        })
+      },
+      deleteCarApi(vid) { // 通过vid删除单个指定汽车
+        let _this = this;
+        axios({
+          method: "delete",
+          url: `${this.url}/car/${vid}`
+        }).then((response) => {
+          _this.selectCarListApi();
+          if (response.data.status === 200) {
+            _this.$message({
+              message: '删除成功',
+              type: 'success'
+            });
+          }
+        }).catch(error => {
+          console.log(error);
+          _this.$message.error('删除失败,' + error.response.data.msg);
+        })
+      },
+
+      // 汽车处理方法
+      addCar() {// 点击新增,进入表单
+        this.carDialogType = "post";
+        if (this.carForm.vid != null) {
+          this.resetCarForm();
+        }
+        this.carDialogVisible = true;
+      },
+      editCar(row) {// 点击修改,进入表单
+        this.carDialogType = "put";
+        this.carForm = row;
+        this.carDialogVisible = true;
+      },
+      submitCar() {// 确认提交新增或修改
+        this.insertOrUpdateCarApi(this.carForm);
+        this.carDialogVisible = false;
+      },
+      removeCar(row) {// 点击删除,弹出对话框二次确认
+        this.$confirm('此操作将删除该汽车数据,是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          center: true
+        }).then(() => {
+          this.deleteCarApi(row.vid);
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+      },
+      resetCarForm() {
+        this.carForm = {
+          batteryHealth: 100,
+          batteryType: null,
+          carId: null,
+          totalDistance: null,
+          vid: null
+        };
+      },
+
+
+      // 规则api
+      selectRuleListApi() {
         let _this = this;
         axios({
           method: "post",
@@ -363,130 +612,247 @@
           _this.ruleTotalCount = response.data.data.total;
         })
       },
-      getRecordList() {
+      insertOrUpdateRuleApi(ruleForm) {
         let _this = this;
         axios({
-          method: "post",
-          url: `${this.url}/warnRecord/list`,
-          data: this.recordPageRequest
-        }).then(function (response) {
-          _this.recordList = response.data.data.records;
-          _this.WarnRecordtotalcount = response.data.data.total;
+          method: this.ruleDialogType,
+          url: `${this.url}/rule`,
+          data: ruleForm
+        }).then((response) => {
+          _this.selectRuleListApi();
+          if (response.data.status === 200) {
+            this.resetRuleForm();
+            _this.$message({
+              message: '编辑成功',
+              type: 'success'
+            });
+          }
+        }).catch(error => {
+          console.log(error);
+          _this.$message.error('编辑失败,' + error.response.data.msg);
+        })
+      },
+      deleteRuleApi(id) { // 通过主键id删除规则
+        let _this = this;
+        axios({
+          method: "delete",
+          url: `${this.url}/rule/${id}`
+        }).then((response) => {
+          _this.selectRuleListApi();
+          if (response.data.status === 200) {
+            _this.$message({
+              message: '删除成功',
+              type: 'success'
+            });
+          }
+        }).catch(error => {
+          console.log(error);
+          _this.$message.error('删除失败,' + error.response.data.msg);
         })
       },
 
+      // 规则处理方法
+      addRule() {// 点击新增,进入表单
+        this.ruleDialogType = "post";
+        if (this.ruleForm.id != null) {
+          this.resetRuleForm();
+        }
+        this.ruleDialogVisible = true;
+      },
+      editRule(row) {// 点击修改,进入表单
+        this.ruleDialogType = "put";
+        this.ruleForm = row;
+        this.ruleDialogVisible = true;
+      },
+      submitRule() {// 确认提交新增或修改
+        this.insertOrUpdateRuleApi(this.ruleForm);
+        this.ruleDialogVisible = false;
+      },
+      removeRule(row) {// 点击删除,弹出对话框二次确认
+        this.$confirm('此操作将删除该规则数据,是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+          center: true
+        }).then(() => {
+          this.deleteRuleApi(row.id);
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+
+      },
+      resetRuleForm() {
+        this.ruleForm = {
+          "id": null,
+          "warnId": null,
+          "warnName": null,
+          "batteryType": null,
+          "formulaRateConfig": {
+            "formula": null,
+            "rate": [
+              {
+                "warnLever": 0,
+                "condition": [
+                  {
+                    "operator": ">=",
+                    "value": 10.0
+                  }
+                ]
+              },
+              {
+                "warnLever": null,
+                "condition": [
+                  {
+                    "operator": "<",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          }
+        };
+      },
+
+      // 预警等级
+      addRate() {
+        // 获取已有的warnLever
+        const existingLevels = this.ruleForm.formulaRateConfig.rate.map(rate => rate.warnLever);
+        // 找到下一个未使用的warnLever
+        let newLevel = 0;
+        while (newLevel <= 10 && existingLevels.includes(newLevel)) {
+          newLevel++;
+        }
+        if (newLevel > 10) {
+          this.$message.error('预警等级已经很多了');
+        } else {
+          this.ruleForm.formulaRateConfig.rate.push({
+            warnLever: newLevel,
+            condition: [
+              {
+                operator: ">=",
+                value: 0
+              }
+            ]
+          });
+        }
+      },
+      removeRate(index) {
+        this.ruleForm.formulaRateConfig.rate.splice(index, 1);
+      },
+
+      // 预警等级满足的条件
+      addCondition(rateIndex) {
+        this.ruleForm.formulaRateConfig.rate[rateIndex].condition.push({
+          operator: ">=",
+          value: 0
+        });
+      },
+      removeCondition(rateIndex, conditionIndex) {
+        this.ruleForm.formulaRateConfig.rate[rateIndex].condition.splice(conditionIndex, 1);
+      },
+
+
+      // 预警记录api
+      selectRecordListApi() {
+        let _this = this;
+        axios({
+          method: "post",
+          url: `${this.url}/record/list`,
+          data: this.recordPageRequest
+        }).then(function (response) {
+          _this.recordList = response.data.data.records;
+          _this.recordTotalCount = response.data.data.total;
+        })
+      },
+      updateMarkRecordAsReadApi(record) {
+        let _this = this;
+        axios({
+          method: "put",
+          url: `${this.url}/record/${record.id}`,
+        }).then((response) => {
+          _this.selectRecordListApi();
+          if (response.data.status === 200) {
+            _this.$message({
+              message: '标记为已读',
+              type: 'success'
+            });
+          }
+        }).catch(error => {
+          console.log(error);
+          _this.$message.error('已读失败,' + error.response.data.msg);
+        })
+      },
+
+
+      // 日期格式化
+      formatRecordDate(row, column, cellValue) {
+        if (!cellValue) return "未处理";
+        const date = new Date(cellValue);
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const dd = String(date.getDate()).padStart(2, "0");
+        const HH = String(date.getHours()).padStart(2, "0");
+        const MM = String(date.getMinutes()).padStart(2, "0");
+        const SS = String(date.getSeconds()).padStart(2, "0");
+        return `${yyyy}年${mm}月${dd}日\n${HH}:${MM}:${SS}`;
+      },
+
+      // 点击左侧的栏事件,刷新数据
+      handelMenuChange(index) {
+        switch (index) {
+          case 2:
+            this.selectCarListApi();
+            break;
+          case 3:
+            this.selectRuleListApi();
+            break;
+          case 4:
+            this.selectRecordListApi();
+            break
+        }
+      },
 
       // 分页变化
       carListHandleSizeChange(val) {
         this.carPageRequest.pageSize = val;
+        this.selectCarListApi();
       },
       carListHandleCurrentChange(val) {
         this.carCurrentPage = val;
         this.carPageRequest.pageNumber = val;
-        this.getCarList();
+        this.selectCarListApi();
       },
       ruleListHandleSizeChange(val) {
         this.rulePageRequest.pageSize = val;
+        this.selectRuleListApi();
       },
       ruleListHandleCurrentChange(val) {
         this.ruleCurrentPage = val;
         this.rulePageRequest.pageNumber = val;
-        this.getRuleList();
+        this.selectRuleListApi();
       },
       recordListHandleSizeChange(val) {
         this.recordPageRequest.pageSize = val;
+        this.selectRecordListApi();
       },
       recordListHandleCurrentChange(val) {
         this.recordCurrentPage = val;
         this.recordPageRequest.pageNumber = val;
-        this.getRecordList();
+        this.selectRecordListApi();
       },
 
-
-      openDialog() {
-        //清理规则表单数据
-        this.ruleForm = {};
-        this.ruleDialogVisible = true;
-      },
-
-      addorUpdateRule() {
-        if (this.ruleForm.id) {
-          let _this = this;
-          axios({
-            method: "put",
-            url: `${this.url}/rule`,
-            data: _this.ruleForm
-          }).then(function (response) {
-            console.log(response);
-            _this.ruleDialogVisible = false;
-            _this.getRuleList();
-            // 弹出消息提示
-            _this.$message({
-              message: '恭喜你，修改成功',
-              type: 'success'
-            });
-          })
-        } else {
-          let _this = this;
-          axios({
-            method: "post",
-            url: `${this.url}/rule`,
-            data: _this.ruleForm
-          }).then(function (response) {
-            console.log(response);
-            _this.ruleDialogVisible = false;
-            _this.getRuleList();
-            // 弹出消息提示
-            _this.$message({
-              message: '恭喜你，添加成功',
-              type: 'success'
-            });
-          })
-        }
-      },
-
-      editRule(row) {
-        this.ruleForm = JSON.parse(JSON.stringify(row));
-        console.log(this.ruleForm);
-        this.ruleDialogVisible = true;
-      },
-      deleteRule(row) {
-        // console.log(row);
-        var _this = this;
-        axios({
-          method: "delete",
-          url: `${this.url}/rule/${row.id}`
-        }).then(function (response) {
-          console.log(response);
-          _this.getRuleList();
-          _this.$message({
-            message: '恭喜你，删除成功',
-            type: 'success'
-          });
-        })
-      },
-
-      readRecord(row) {
-        console.log(row);
-        let _this = this;
-        axios({
-          method: "put",
-          url: `${this.url}/warnRecord/${row.id}/read`
-        }).then(function (response) {
-          console.log(response);
-          _this.getRecordList();
-          _this.$message({
-            message: '处理成功',
-            type: 'success'
-          });
-        })
-      },
       // 为表格的每一行设置不同样式的函数
-      rowClassName({row, rowIndex}) {
+      carRowClassName({row, rowIndex}) {
         return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
       },
-      RecordRowClassName({row}) {
-        return row.status === '未读' ? 'record-row-read' : '';
+      ruleRowClassName({row, rowIndex}) {
+        return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
+      },
+      recordRowClassName({row}) {
+        return row.dealTime != null ? 'record-row-unread' : '';
       }
     }
   })

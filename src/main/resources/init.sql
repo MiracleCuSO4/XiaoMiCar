@@ -4,16 +4,16 @@ USE `xiaomi_car`;
 DROP TABLE IF EXISTS `car`;
 CREATE TABLE `car`
 (
-    `vid`            varchar(32)      NOT NULL COMMENT '车辆识别码Vehicle Identification',
-    `car_id`         int(11) unsigned NOT NULL COMMENT '车架编号',
-    `battery_type`   varchar(32)      NOT NULL COMMENT '电池类型',
-    `total_distance` int(11) unsigned NOT NULL DEFAULT 0 COMMENT '总里程(km)',
-    `battery_health` int(11) unsigned NOT NULL DEFAULT 100 COMMENT '电池健康状态(%)',
-    `create_time`    timestamp        NOT NULL DEFAULT current_timestamp COMMENT '创建时间',
-    `update_time`    timestamp        NOT NULL DEFAULT current_timestamp ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `is_delete`      tinyint unsigned NOT NULL DEFAULT 0 COMMENT '0=未删除,1=逻辑删除',
+    `vid`            varchar(32)             NOT NULL COMMENT '车辆识别码Vehicle Identification',
+    `car_id`         int(11) unsigned UNIQUE NOT NULL COMMENT '车架编号',
+    `battery_type`   varchar(32)             NOT NULL COMMENT '电池类型',
+    `total_distance` int(11) unsigned        NOT NULL DEFAULT 0 COMMENT '总里程(km)',
+    `battery_health` int(11) unsigned        NOT NULL DEFAULT 100 COMMENT '电池健康状态(%)',
+    `create_time`    timestamp               NOT NULL DEFAULT current_timestamp COMMENT '创建时间',
+    `update_time`    timestamp               NOT NULL DEFAULT current_timestamp ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_delete`      tinyint unsigned        NOT NULL DEFAULT 0 COMMENT '0=未删除,1=逻辑删除',
     PRIMARY KEY (`vid`),
-    INDEX idx_car_id (`car_id`),
+    INDEX  uk_car_id (`car_id`),
     INDEX idx_battery_type (`battery_type`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4 COMMENT ='车辆信息表';
@@ -56,15 +56,15 @@ CREATE TABLE `record`
 
 
 # 创建小米汽车电池预警数据库使用的一个用户
-CREATE USER 'xiaomi_car_warn_service'@'%' IDENTIFIED BY 'XiaoMi1fas6geYWTRHs6s2fdshs9d22da65Wt126ezh';
-GRANT SELECT, INSERT, UPDATE, DELETE ON `xiaomi_car`.* TO 'xiaomi_car_warn_service'@'%';
-# GRANT ALL PRIVILEGES ON xiaomi_car.* TO 'xiaomi_car_warn_service'@'%';
-# REVOKE GRANT OPTION ON xiaomi_car.* FROM 'xiaomi_car_warn_service'@'%';
+CREATE USER 'xiaomi_car_warn_service_new'@'%' IDENTIFIED BY 'XiaoMi1f1sdg4236AFGEfaf2w6g5gwsgawa5faawTwfsh';
+GRANT SELECT, INSERT, UPDATE, DELETE ON `xiaomi_car`.* TO 'xiaomi_car_warn_service_new'@'%';
+# GRANT ALL PRIVILEGES ON xiaomi_car.* TO 'xiaomi_car_warn_service_new'@'%';
+# REVOKE GRANT OPTION ON xiaomi_car.* FROM 'xiaomi_car_warn_service_new'@'%';
 FLUSH PRIVILEGES;
-SHOW GRANTS FOR 'xiaomi_car_warn_service';
-# DROP USER 'xiaomi_car_warn_service'@'%';
+SHOW GRANTS FOR 'xiaomi_car_warn_service_new';
+# DROP USER 'xiaomi_car_warn_service_new'@'%';
 
-# 题目自带数据,可以在这里执行,或者通过测试类添加,二选一
+
 INSERT INTO xiaomi_car.rule (id, warn_id, warn_name, battery_type, formula_rate_config, create_time, update_time, is_delete) VALUES (1, 1, '电压差报警', '三元电池', '{"formula":"${Mx} - ${Mi}","rate":[{"warnLever":0,"condition":[{"operator":">=","value":5.0}]},{"warnLever":1,"condition":[{"operator":">=","value":3.0},{"operator":"<","value":5.0}]},{"warnLever":2,"condition":[{"operator":">=","value":1.0},{"operator":"<","value":3.0}]},{"warnLever":3,"condition":[{"operator":">=","value":0.6},{"operator":"<","value":1.0}]},{"warnLever":4,"condition":[{"operator":">=","value":0.2},{"operator":"<","value":0.6}]},{"warnLever":null,"condition":[{"operator":"<","value":0.2}]}]}', '2024-06-17 16:26:07', '2024-06-17 16:26:07', 0);
 INSERT INTO xiaomi_car.rule (id, warn_id, warn_name, battery_type, formula_rate_config, create_time, update_time, is_delete) VALUES (2, 1, '电压差报警', '铁锂电池', '{"formula":"${Mx} - ${Mi}","rate":[{"warnLever":0,"condition":[{"operator":">=","value":2.0}]},{"warnLever":1,"condition":[{"operator":">=","value":1.0},{"operator":"<","value":2.0}]},{"warnLever":2,"condition":[{"operator":">=","value":0.7},{"operator":"<","value":1.0}]},{"warnLever":3,"condition":[{"operator":">=","value":0.4},{"operator":"<","value":0.7}]},{"warnLever":4,"condition":[{"operator":">=","value":0.2},{"operator":"<","value":0.4}]},{"warnLever":null,"condition":[{"operator":"<","value":0.2}]}]}', '2024-06-17 16:26:07', '2024-06-17 16:26:07', 0);
 INSERT INTO xiaomi_car.rule (id, warn_id, warn_name, battery_type, formula_rate_config, create_time, update_time, is_delete) VALUES (3, 2, '电流差报警', '三元电池', '{"formula":"${Ix} - ${Ii}","rate":[{"warnLever":0,"condition":[{"operator":">=","value":3.0}]},{"warnLever":1,"condition":[{"operator":">=","value":1.0},{"operator":"<","value":3.0}]},{"warnLever":2,"condition":[{"operator":">=","value":0.2},{"operator":"<","value":1.0}]},{"warnLever":null,"condition":[{"operator":"<","value":0.2}]}]}', '2024-06-17 16:26:07', '2024-06-17 16:26:07', 0);
@@ -73,5 +73,4 @@ INSERT INTO xiaomi_car.rule (id, warn_id, warn_name, battery_type, formula_rate_
 INSERT INTO xiaomi_car.car (vid, car_id, battery_type, total_distance, battery_health, create_time, update_time, is_delete) VALUES ('429s4i1v67mplcit', 1, '三元电池', 100, 100, '2024-06-19 21:54:47', '2024-06-19 22:19:21', 0);
 INSERT INTO xiaomi_car.car (vid, car_id, battery_type, total_distance, battery_health, create_time, update_time, is_delete) VALUES ('weh6ai2qmi69fvqi', 2, '铁锂电池', 600, 95, '2024-06-19 21:54:47', '2024-06-19 21:54:47', 0);
 INSERT INTO xiaomi_car.car (vid, car_id, battery_type, total_distance, battery_health, create_time, update_time, is_delete) VALUES ('73dzvl8d9lvzm3yc', 3, '三元电池', 300, 98, '2024-06-19 21:54:47', '2024-06-19 21:54:47', 0);
-
 

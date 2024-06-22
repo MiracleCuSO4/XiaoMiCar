@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -58,7 +59,12 @@ public class CarServiceImpl extends ServiceImpl<CarMapper, Car> implements CarSe
     public void insertCar(CarDto carDto) {
         Car car = BeanUtil.copyProperties(carDto, Car.class);
         car.setVid(RandomUtil.randomString(16));
-        save(car);
+        try {
+            save(car);
+        } catch (Exception e) {
+            // 因为车架id重复时可能有多个电池类型,这样来自一辆车的信号数据用多个电池类型的规则来判断不合理
+            throw new IllegalArgumentException("新增失败,不支持carId重复的情况");
+        }
     }
 
     @Override
@@ -91,5 +97,16 @@ public class CarServiceImpl extends ServiceImpl<CarMapper, Car> implements CarSe
                 .collect(Collectors.toList());
 
         return new PageResult<>(page.getTotal(), carVoList);
+    }
+
+    @Override
+    public void deleteByVid(String vid) {
+        Car car = getById(vid);
+        if(car == null){
+            throw new DataNotExistException("vid为" + vid + "的汽车不存在");
+        }
+        removeById(vid);
+        String carCacheKey = String.format(RedisConstant.CAR_KEY, car.getCarId());
+        stringRedisTemplate.delete(carCacheKey);
     }
 }

@@ -50,10 +50,17 @@ public class CarController {
         return Result.okResult(null);
     }
 
-    @DeleteMapping("/{id}")
-    @ApiOperation("删除汽车")
+    @DeleteMapping("/carId/{id}")
+    @ApiOperation("通过车架id删除多个汽车")
     public Result<Void> deleteByCarId(@PathVariable("id") Integer carId){
         carService.deleteByCarId(carId);
+        return Result.okResult(null);
+    }
+
+    @DeleteMapping("/{vid}")
+    @ApiOperation("通过vid删除指定汽车")
+    public Result<Void> deleteById(@PathVariable("vid") String vid){
+        carService.deleteByVid(vid);
         return Result.okResult(null);
     }
 
