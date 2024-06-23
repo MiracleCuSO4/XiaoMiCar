@@ -11,7 +11,7 @@ public interface RecordService extends IService<Record> {
 
     PageResult<RecordVo> selectPageList(PageRequest pageRequest);
 
-    void markAsRead(Integer id);
+    void updateMarkAsRead(Integer id);
 
     void deleteById(Integer id);
 }

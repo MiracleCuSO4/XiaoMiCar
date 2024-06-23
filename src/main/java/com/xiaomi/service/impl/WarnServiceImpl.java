@@ -10,6 +10,7 @@ import com.xiaomi.domain.rule.Condition;
 import com.xiaomi.domain.rule.Rate;
 import com.xiaomi.domain.vo.CarVo;
 import com.xiaomi.domain.vo.WarnVo;
+import com.xiaomi.mapper.ResetMapper;
 import com.xiaomi.service.CarService;
 import com.xiaomi.service.RecordService;
 import com.xiaomi.service.RuleService;
@@ -17,7 +18,9 @@ import com.xiaomi.service.WarnService;
 import com.xiaomi.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.script.ScriptEngine;
@@ -26,6 +29,7 @@ import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +47,10 @@ public class WarnServiceImpl implements WarnService {
     private final RuleService ruleService;
 
     private final RecordService recordService;
+
+    private final ResetMapper resetMapper;
+
+    private final StringRedisTemplate stringRedisTemplate;
 
     // 使用js脚本引擎计算公式值
     private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("JavaScript");
@@ -188,4 +196,57 @@ public class WarnServiceImpl implements WarnService {
             }
         });
     }
+
+    /**
+     * 定时重置数据
+     */
+    @Transactional
+    @Override
+    public void resetData() {
+        log.warn("开始重置mysql数据库表和清除redis缓存");
+
+        int carRowCount = resetMapper.countCarTable();
+        resetMapper.truncateCarTable();
+        int carCopied = resetMapper.copyDataFromOriginalCarTable();
+        log.warn("Car table: {} rows truncated, {} rows copied from backup.", carRowCount, carCopied);
+
+        int ruleRowCount = resetMapper.countRuleTable();
+        resetMapper.truncateRuleTable();
+        int ruleCopied = resetMapper.copyDataFromOriginalRuleTable();
+        log.warn("Rule table: {} rows truncated, {} rows copied from backup.", ruleRowCount, ruleCopied);
+
+        int recordRowCount = resetMapper.countRecordTable();
+        resetMapper.truncateRecordTable();
+        int recordCopied = resetMapper.copyDataFromOriginalRecordTable();
+        log.warn("Record table: {} rows truncated, {} rows copied from backup.", recordRowCount, recordCopied);
+
+        log.warn("数据库表和重置完成");
+
+        clearRedisCache();
+    }
+
+    private void clearRedisCache() {
+        log.warn("开始清除redis缓存");
+
+        // 删除 "ruleQuery:%s:%s" 格式的 key
+        Set<String> ruleQueryKeys = stringRedisTemplate.keys("ruleQuery:*");
+        if (ruleQueryKeys != null && !ruleQueryKeys.isEmpty()) {
+            stringRedisTemplate.delete(ruleQueryKeys);
+            log.warn("Deleted {} ruleQuery keys from Redis cache.", ruleQueryKeys.size());
+        } else {
+            log.warn("No ruleQuery keys found in Redis cache.");
+        }
+
+        // 删除 "car:%s" 格式的 key
+        Set<String> carKeys = stringRedisTemplate.keys("car:*");
+        if (carKeys != null && !carKeys.isEmpty()) {
+            stringRedisTemplate.delete(carKeys);
+            log.warn("Deleted {} car keys from Redis cache.", carKeys.size());
+        } else {
+            log.warn("No car keys found in Redis cache.");
+        }
+
+        log.warn("redis缓存清除完成");
+    }
+
 }

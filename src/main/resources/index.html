@@ -434,8 +434,8 @@
     },
     data() {
       return {
-        url: "http://111.230.66.66:9000/api",
-        // url: "http://127.0.0.1:9000/api",
+        // url: "http://111.230.66.66:9000/api",
+        url: "http://127.0.0.1:9000/api",
 
         clickMenu: 1,//当前选中的菜单
 
@@ -501,6 +501,7 @@
           }
         },
 
+        haveRead: false // 是否已读线上环境提示
       }
     },
     methods: {
@@ -519,6 +520,7 @@
         })
       },
       insertOrUpdateCarApi(carForm) {
+        this.tip();
         let _this = this;
         axios({
           method: this.carDialogType,
@@ -539,6 +541,7 @@
         })
       },
       deleteCarApi(vid) { // 通过vid删除单个指定汽车
+        this.tip();
         let _this = this;
         axios({
           method: "delete",
@@ -613,6 +616,7 @@
         })
       },
       insertOrUpdateRuleApi(ruleForm) {
+        this.tip();
         let _this = this;
         axios({
           method: this.ruleDialogType,
@@ -633,6 +637,7 @@
         })
       },
       deleteRuleApi(id) { // 通过主键id删除规则
+        this.tip();
         let _this = this;
         axios({
           method: "delete",
@@ -768,6 +773,7 @@
         })
       },
       updateMarkRecordAsReadApi(record) {
+        this.tip();
         let _this = this;
         axios({
           method: "put",
@@ -803,13 +809,13 @@
       // 点击左侧的栏事件,刷新数据
       handelMenuChange(index) {
         switch (index) {
-          case 2:
+          case '2':
             this.selectCarListApi();
             break;
-          case 3:
+          case '3':
             this.selectRuleListApi();
             break;
-          case 4:
+          case '4':
             this.selectRecordListApi();
             break
         }
@@ -844,6 +850,14 @@
         this.selectRecordListApi();
       },
 
+      // 线上环境提示
+      tip(){
+        if(!this.haveRead){
+          this.haveRead = true;
+          alert("很高兴你能来体验我的项目,由于线上环境没有做认证功能,我设置了所有对数据库产生的修改会在10分钟后重置,你可以尽情地修改数据啦~");
+        }
+      },
+
       // 为表格的每一行设置不同样式的函数
       carRowClassName({row, rowIndex}) {
         return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
@@ -852,7 +866,7 @@
         return rowIndex % 2 === 0 ? 'even-row' : 'odd-row';
       },
       recordRowClassName({row}) {
-        return row.dealTime != null ? 'record-row-unread' : '';
+        return row.dealTime == null ? 'record-row-unread' : '';
       }
     }
   })

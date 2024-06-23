@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface WarnService {
     Result<List<WarnVo>> warn(List<SignalDto> dtoList);
+
+    void resetData();
 }

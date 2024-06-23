@@ -37,8 +37,8 @@ public class RecordController {
 
     @PutMapping("/{id}")
     @ApiOperation("修改预警记录为已读")
-    public Result<Void> markAsRead(@PathVariable("id") Integer id){
-        recordService.markAsRead(id);
+    public Result<Void> updateMarkAsRead(@PathVariable("id") Integer id){
+        recordService.updateMarkAsRead(id);
         return Result.okResult(null);
     }
 

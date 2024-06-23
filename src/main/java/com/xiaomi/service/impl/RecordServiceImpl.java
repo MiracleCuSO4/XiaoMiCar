@@ -45,7 +45,7 @@ public class RecordServiceImpl extends ServiceImpl<RecordMapper, Record> impleme
     }
 
     @Override
-    public void markAsRead(Integer id) {
+    public void updateMarkAsRead(Integer id) {
         update(Wrappers.<Record>lambdaUpdate().eq(Record::getId, id).set(Record::getDealTime, Timestamp.from(Instant.now())));
     }
 
